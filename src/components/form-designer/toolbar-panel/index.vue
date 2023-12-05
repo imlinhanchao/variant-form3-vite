@@ -54,6 +54,9 @@
                          :option-data="testOptionData" :global-dsv="designerDsv" @myEmitTest="onMyEmitTest"
                          @appendButtonClick="testOnAppendButtonClick" @buttonClick="testOnButtonClick"
                          @formChange="handleFormChange">
+              <template v-for="slotName in Object.keys($slots).filter(s => s.endsWith('-widget'))" #[slotName]="scope">
+                <slot :name="slotName" v-bind="scope"></slot>
+              </template>
             </VFormRender>
           </div>
         </div>

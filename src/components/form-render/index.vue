@@ -23,12 +23,25 @@
           </template>
         </component>
       </template>
-      <template v-else>
+      <template v-else-if="widgets[getWidgetName(widget)]">
         <component :is="getWidgetName(widget)" :field="widget" :form-model="formDataModel" :designer="null" :key="widget.id" :parent-list="widgetList"
                       :index-of-parent-list="index" :parent-widget="null">
           <!-- 递归传递插槽！！！ -->
           <template v-for="slot in Object.keys($slots)" v-slot:[slot]="scope">
             <slot :name="slot" v-bind="scope"/>
+          </template>
+        </component>
+      </template>
+      <template v-else>
+        <component 
+          :is="widget.formItemFlag ? 'custom-widget' : 'slot-widget'" 
+          :field="widget" :form-model="formDataModel" :designer="null" :key="widget.id" :parent-list="widgetList"
+          :index-of-parent-list="index" :parent-widget="null"
+        >
+          <template #default="scoped">
+            <span class="custom-widge">
+              <slot :name="widget.type + '-widget'" v-bind="scoped" />
+            </span>
           </template>
         </component>
       </template>
@@ -144,6 +157,9 @@
         return !!this.formConfig && !!this.formConfig.customClass ? this.formConfig.customClass : ''
       },
 
+      widgets() {
+        return FieldComponents;
+      },
     },
     watch: {
       //

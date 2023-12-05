@@ -16,6 +16,9 @@
                 </el-collapse-item>
 
                 <el-collapse-item name="2" v-if="showCollapse(advProps)" :title="i18nt('designer.setting.advancedSetting')">
+                  <template v-for="editorName in customProps">
+                    <slot :name="editorName" :designer="designer" :selected-widget="selectedWidget" :option-model="optionModel" />
+                  </template>
                   <template v-for="(editorName, propName) in advProps">
                     <component v-if="hasPropEditor(propName, editorName)" :is="getPropEditor(propName, editorName)"
                                :designer="designer" :selected-widget="selectedWidget" :option-model="optionModel"></component>
@@ -25,6 +28,8 @@
                 <el-collapse-item name="3" v-if="showEventCollapse() && showCollapse(eventProps)" :title="i18nt('designer.setting.eventSetting')">
                   <template v-for="(editorName, propName) in eventProps">
                     <component v-if="hasPropEditor(propName, editorName)" :is="getPropEditor(propName, editorName)"
+                               :designer="designer" :selected-widget="selectedWidget" :option-model="optionModel"></component>
+                    <component v-else is="onCustomEditor" :type="propName" :params="editorName"
                                :designer="designer" :selected-widget="selectedWidget" :option-model="optionModel"></component>
                   </template>
                 </el-collapse-item>
@@ -105,7 +110,7 @@
   import emitter from "@/utils/emitter";
   import { propertyRegistered } from "@/components/form-designer/setting-panel/propertyRegister";
 
-  const {COMMON_PROPERTIES, ADVANCED_PROPERTIES, EVENT_PROPERTIES} = WidgetProperties
+  const {COMMON_PROPERTIES, ADVANCED_PROPERTIES, EVENT_PROPERTIES, CUSTOM_PROPERTIES} = WidgetProperties
 
   export default {
     name: "SettingPanel",
@@ -139,6 +144,7 @@
         commonProps: COMMON_PROPERTIES,
         advProps: ADVANCED_PROPERTIES,
         eventProps: EVENT_PROPERTIES,
+        customProps: CUSTOM_PROPERTIES,
 
         showWidgetEventDialogFlag: false,
         eventHandlerCode: '',
@@ -158,7 +164,9 @@
           this.selectedWidget.options = newValue
         }
       },
-
+      editors () {
+        return PropertyEditors;
+      },
     },
     watch: {
       'designer.selectedWidget': {

@@ -10,6 +10,7 @@ import {deepClone, generateId, getDefaultFormConfig, overwriteObj} from "@/utils
 import {containers, advancedFields, basicFields, customFields} from "@/components/form-designer/widget-panel/widgetsConfig.js"
 import {VARIANT_FORM_VERSION} from "@/utils/config"
 import eventBus from "@/utils/event-bus"
+import WidgetProperties from './setting-panel/propertyRegister'
 
 export function createDesigner(vueInstance) {
   let defaultFormConfig = deepClone( getDefaultFormConfig() )
@@ -624,6 +625,32 @@ export function createDesigner(vueInstance) {
       }
 
       return Object.keys(originalWidget.options).indexOf(configName) > -1
+    },
+
+    addCustomConfig(widget) {
+      if (!widget) {
+        return
+      }
+
+      let originalWidget = null
+      if (!!widget.category) {
+        originalWidget = this.getContainerByType(widget.type)
+      } else {
+        originalWidget = this.getFieldWidgetByType(widget.type)
+      }
+
+      if (!originalWidget || !originalWidget.options) {
+        return
+      }
+
+      const {COMMON_PROPERTIES, ADVANCED_PROPERTIES, EVENT_PROPERTIES, CUSTOM_PROPERTIES} = WidgetProperties;
+      const props = Object.keys({ ...COMMON_PROPERTIES, ...ADVANCED_PROPERTIES, ...EVENT_PROPERTIES });
+      Object.keys(widget.options).forEach(ck => {
+        if (!props.includes(ck)) {
+          if (ck.startsWith('on')) EVENT_PROPERTIES[ck] = widget.options[ck];
+          else CUSTOM_PROPERTIES[ck] = ck + '-editor';
+        }
+      })
     },
 
     upgradeWidgetConfig(oldWidget) {

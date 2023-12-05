@@ -18,9 +18,27 @@
                 <component :is="getWidgetName(widget)" :widget="widget" :designer="designer" :key="widget.id" :parent-list="designer.widgetList"
                                   :index-of-parent-list="index" :parent-widget="null"></component>
               </template>
-              <template v-else>
+              <template v-else-if="widgets[getWidgetName(widget)]">
                 <component :is="getWidgetName(widget)" :field="widget" :designer="designer" :key="widget.id" :parent-list="designer.widgetList"
                               :index-of-parent-list="index" :parent-widget="null" :design-state="true"></component>
+              </template>
+              <template v-else>
+                <component 
+                  :is="widget.formItemFlag ? 'custom-widget' : 'slot-widget'" 
+                  :field="widget" 
+                  :designer="designer" 
+                  :key="widget.id" 
+                  :parent-list="designer.widgetList"
+                  :index-of-parent-list="index" 
+                  :parent-widget="null" 
+                  :design-state="true"
+                >
+                  <template #default="scoped">
+                    <span class="custom-widge">
+                      <slot :name="widget.type + '-widget'" v-bind="scoped" />
+                    </span>
+                  </template>
+                </component>
               </template>
             </div>
           </template>
@@ -82,6 +100,10 @@
         }
 
         return 'left'
+      },
+
+      widgets() {
+        return FieldComponents;
       },
 
       size() {

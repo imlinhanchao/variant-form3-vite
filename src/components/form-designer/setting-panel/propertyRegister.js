@@ -58,6 +58,7 @@ const COMMON_PROPERTIES = {
   'fileMaxSize'       :            'fileMaxSize-editor',
   'fileTypes'         :            'fileTypes-editor',
   'contentHeight'     :            'contentHeight-editor',
+  'showFileList'      :            'showFileList-editor',
   'customClass'       :            'customClass-editor',
 
   //容器
@@ -137,6 +138,9 @@ const EVENT_PROPERTIES = {
 
 }
 
+const CUSTOM_PROPERTIES = {
+}
+
 /**
  * 注册组件常见属性
  * 如属性编辑器的组件名称propEditorName设置为null，则不显示该属性编辑器！！
@@ -214,7 +218,8 @@ export function registerEPEditor(app, uniquePropName, propEditorName, editorComp
 export default {
   COMMON_PROPERTIES,
   ADVANCED_PROPERTIES,
-  EVENT_PROPERTIES
+  EVENT_PROPERTIES,
+  CUSTOM_PROPERTIES,
 }
 
 

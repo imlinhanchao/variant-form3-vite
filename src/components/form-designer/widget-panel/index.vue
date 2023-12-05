@@ -52,12 +52,11 @@
             <template #item="{ element: fld }">
               <li class="field-widget-item" :title="fld.displayName" @dblclick="addFieldByDbClick(fld)">
                 <span>
-                  <svg-icon :icon-class="fld.icon" class-name="color-svg-icon" />{{i18n2t(`designer.widgetLabel.${fld.type}`, `extension.widgetLabel.${fld.type}`)}}</span>
+                  <svg-icon :icon-class="fld.icon" class-name="color-svg-icon" />{{fld.displayName}}</span>
               </li>
             </template>
           </draggable>
         </el-collapse-item>
-
       </el-collapse>
 
       </el-tab-pane>
@@ -115,6 +114,7 @@
     },
     props: {
       designer: Object,
+      customWidgets: Array,
     },
     inject: ['getBannedWidgets', 'getDesignerConfig'],
     data() {
@@ -206,15 +206,20 @@
           return !this.isBanned(fld.type)
         })
 
+        if (this.customWidgets) {
+          CFS.push(...this.customWidgets);
+          this.customWidgets.forEach(w => this.designer.addCustomConfig(w));
+        }
+
         this.customFields = CFS.map(fld => {
           return {
             key: generateId(),
             ...fld,
-            displayName: this.i18n2t(`designer.widgetLabel.${fld.type}`, `extension.widgetLabel.${fld.type}`)
+            displayName: fld.name || this.i18n2t(`designer.widgetLabel.${fld.type}`, `extension.widgetLabel.${fld.type}`)
           }
         }).filter(fld => {
           return !this.isBanned(fld.type)
-        })
+        });
       },
 
       handleContainerWidgetClone(origin) {

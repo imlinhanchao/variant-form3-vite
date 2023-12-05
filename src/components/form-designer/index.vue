@@ -10,44 +10,29 @@
 
 <template>
   <el-container class="main-container full-height">
-    <el-header class="main-header">
-      <div class="float-left main-title">
-        <img src="../../assets/vform-logo.png" @click="openHome">
-        <span class="bold">VForm 3</span> {{i18nt('application.productTitle')}} <span class="version-span">Ver {{vFormVersion}}</span></div>
-      <div class="float-right external-link">
-        <el-dropdown v-if="showLink('languageMenu')" :hide-timeout="2000" @command="handleLanguageChanged">
-          <span class="el-dropdown-link">{{curLangName}}<svg-icon icon-class="el-arrow-down" /></span>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item command="zh-CN">{{i18nt('application.zh-CN')}}</el-dropdown-item>
-              <el-dropdown-item command="en-US">{{i18nt('application.en-US')}}</el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-        <a v-if="showLink('externalLink')" href="javascript:void(0)" @click="(ev) => openUrl(ev, gitUrl)" target="_blank"><svg-icon icon-class="github" />{{i18nt('application.github')}}</a>
-        <a v-if="showLink('externalLink')" href="javascript:void(0)" @click="(ev) => openUrl(ev, docUrl)" target="_blank"><svg-icon icon-class="document" />{{i18nt('application.document')}}</a>
-        <a v-if="showLink('externalLink')" href="javascript:void(0)" @click="(ev) => openUrl(ev, chatUrl)" target="_blank">{{i18nt('application.qqGroup')}}</a>
-        <a v-if="showLink('externalLink')" href="javascript:void(0)" @click="(ev) => openUrl(ev, subScribeUrl)" target="_blank">
-          {{i18nt('application.subscription')}}<i class="el-icon-top-right"></i></a>
-      </div>
-    </el-header>
-
     <el-container>
       <el-aside class="side-panel">
-        <widget-panel :designer="designer" />
+        <widget-panel :designer="designer" :custom-widgets="customWidgets">
+        </widget-panel>
       </el-aside>
 
       <el-container class="center-layout-container">
         <el-header class="toolbar-header">
           <toolbar-panel :designer="designer" :global-dsv="globalDsv" ref="toolbarRef">
-            <template v-for="(idx, slotName) in $slots" #[slotName]>
-              <slot :name="slotName"></slot>
+            <template #customToolButtons>
+              <slot name="customToolButtons" :designer="designer" :global-dsv="globalDsv"></slot>
+            </template>
+            <template v-for="slotName in Object.keys($slots).filter(s => s.endsWith('-widget'))" #[slotName]="scope">
+              <slot :name="slotName" v-bind="scope"></slot>
             </template>
           </toolbar-panel>
         </el-header>
         <el-main class="form-widget-main">
           <el-scrollbar class="container-scroll-bar" :style="{height: scrollerHeight}">
             <v-form-widget :designer="designer" :form-config="designer.formConfig" :global-dsv="globalDsv" ref="formRef">
+              <template v-for="slotName in Object.keys($slots).filter(s => s.endsWith('-widget'))" #[slotName]="scope">
+                <slot :name="slotName" v-bind="scope"></slot>
+              </template>
             </v-form-widget>
           </el-scrollbar>
         </el-main>
@@ -55,7 +40,11 @@
 
       <el-aside>
         <setting-panel :designer="designer" :selected-widget="designer.selectedWidget"
-                       :form-config="designer.formConfig" :global-dsv="globalDsv" @edit-event-handler="testEEH" />
+                       :form-config="designer.formConfig" :global-dsv="globalDsv" @edit-event-handler="testEEH">
+          <template v-for="slotName in Object.keys($slots).filter(s => s.endsWith('-editor'))" #[slotName]="scope">
+            <slot :name="slotName" v-bind="scope"></slot>
+          </template>
+        </setting-panel>
       </el-aside>
     </el-container>
 
@@ -124,6 +113,11 @@
             resetFormJson: false,  //是否在设计器初始化时将表单内容重置为空
           }
         }
+      },
+
+      customWidgets: {
+        type: Array,
+        default: () => []
       },
 
       /* 全局数据源变量 */
