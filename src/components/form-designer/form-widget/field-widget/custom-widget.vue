@@ -5,7 +5,7 @@
     <section class="custom-section">
       <slot 
         ref="fieldEditor" 
-        v-bind="field.options" 
+        v-bind="{ ...field.options, ...eventHandler }" 
         :size="widgetSize" 
         :model-value="fieldModel"
         @update:modelValue="(val) => fieldModel = val"
@@ -72,6 +72,7 @@
         oldFieldValue: null, //field组件change之前的值
         fieldModel: null,
         rules: [],
+        eventHandler: {},
       }
     },
     computed: {
@@ -112,7 +113,7 @@
       ).forEach(key => {
         if (typeof this.field.options[key] == 'string') {
           const onHandle = new Function(...(this.customEvents[key] || []), this.field.options[key]);
-          this.field.options[key] = (...args) => {
+          this.eventHandler[key] = (...args) => {
             onHandle.call(this, ...args);
           }
         }
