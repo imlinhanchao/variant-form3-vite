@@ -647,7 +647,7 @@ export function createDesigner(vueInstance) {
       const props = Object.keys({ ...COMMON_PROPERTIES, ...ADVANCED_PROPERTIES, ...EVENT_PROPERTIES });
       Object.keys(widget.options).forEach(ck => {
         if (!props.includes(ck)) {
-          if (ck.startsWith('on')) EVENT_PROPERTIES[ck] = widget.options[ck];
+          if (ck.startsWith('on')) EVENT_PROPERTIES[ck] = 'onCustom-editor';
           else CUSTOM_PROPERTIES[ck] = ck + '-editor';
         }
       })

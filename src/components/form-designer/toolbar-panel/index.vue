@@ -50,7 +50,7 @@
                  :fullscreen="(layoutType === 'H5') || (layoutType === 'Pad')">
         <div>
           <div class="form-render-wrapper" :class="[layoutType === 'H5' ? 'h5-layout' : (layoutType === 'Pad' ? 'pad-layout' : '')]">
-            <VFormRender ref="preForm" :form-json="formJson" :form-data="testFormData" :preview-state="true"
+            <VFormRender ref="preForm" :custom-events="customEvents" :form-json="formJson" :form-data="testFormData" :preview-state="true"
                          :option-data="testOptionData" :global-dsv="designerDsv" @myEmitTest="onMyEmitTest"
                          @appendButtonClick="testOnAppendButtonClick" @buttonClick="testOnButtonClick"
                          @formChange="handleFormChange">
@@ -218,6 +218,10 @@
     props: {
       designer: Object,
       globalDsv: {
+        type: Object,
+        default: () => ({})
+      },
+      customEvents: {
         type: Object,
         default: () => ({})
       },

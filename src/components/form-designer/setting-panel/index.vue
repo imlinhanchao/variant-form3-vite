@@ -27,9 +27,9 @@
 
                 <el-collapse-item name="3" v-if="showEventCollapse() && showCollapse(eventProps)" :title="i18nt('designer.setting.eventSetting')">
                   <template v-for="(editorName, propName) in eventProps">
-                    <component v-if="hasPropEditor(propName, editorName)" :is="getPropEditor(propName, editorName)"
+                    <component v-if="hasPropEditor(propName, editorName) && !customEvents[propName]" :is="getPropEditor(propName, editorName)"
                                :designer="designer" :selected-widget="selectedWidget" :option-model="optionModel"></component>
-                    <component v-else is="onCustomEditor" :type="propName" :params="editorName"
+                    <component v-else-if="hasPropEditor(propName, editorName)" is="onCustom-editor" :type="propName" :params="customEvents[propName]"
                                :designer="designer" :selected-widget="selectedWidget" :option-model="optionModel"></component>
                   </template>
                 </el-collapse-item>
@@ -126,6 +126,10 @@
       selectedWidget: Object,
       formConfig: Object,
       globalDsv: {
+        type: Object,
+        default: () => ({})
+      },
+      customEvents: {
         type: Object,
         default: () => ({})
       },

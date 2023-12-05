@@ -32,6 +32,7 @@
                   :index-of-parent-list="index" 
                   :parent-widget="null" 
                   :design-state="true"
+                  :custom-events="customEvents"
                 >
                   <template #default="scoped">
                     <span class="custom-widge">
@@ -66,6 +67,10 @@
       designer: Object,
       formConfig: Object,
       optionData: { //prop传入的选项数据
+        type: Object,
+        default: () => ({})
+      },
+      customEvents: {
         type: Object,
         default: () => ({})
       },

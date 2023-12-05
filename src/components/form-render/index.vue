@@ -16,7 +16,7 @@
     <template v-for="(widget, index) in widgetList">
       <template v-if="'container' === widget.category">
         <component :is="getContainerWidgetName(widget)" :widget="widget" :key="widget.id" :parent-list="widgetList"
-                        :index-of-parent-list="index" :parent-widget="null">
+                        :index-of-parent-list="index" :parent-widget="null" :custom-events="customEvents">
           <!-- 递归传递插槽！！！ -->
           <template v-for="slot in Object.keys($slots)" v-slot:[slot]="scope">
             <slot :name="slot" v-bind="scope"/>
@@ -25,7 +25,7 @@
       </template>
       <template v-else-if="widgets[getWidgetName(widget)]">
         <component :is="getWidgetName(widget)" :field="widget" :form-model="formDataModel" :designer="null" :key="widget.id" :parent-list="widgetList"
-                      :index-of-parent-list="index" :parent-widget="null">
+                      :index-of-parent-list="index" :parent-widget="null" :custom-events="customEvents">
           <!-- 递归传递插槽！！！ -->
           <template v-for="slot in Object.keys($slots)" v-slot:[slot]="scope">
             <slot :name="slot" v-bind="scope"/>
@@ -37,6 +37,7 @@
           :is="widget.formItemFlag ? 'custom-widget' : 'slot-widget'" 
           :field="widget" :form-model="formDataModel" :designer="null" :key="widget.id" :parent-list="widgetList"
           :index-of-parent-list="index" :parent-widget="null"
+          :custom-events="customEvents"
         >
           <template #default="scoped">
             <span class="custom-widge">
@@ -87,6 +88,10 @@
         default: false
       },
       globalDsv: { // 全局数据源变量
+        type: Object,
+        default: () => ({})
+      },
+      customEvents: {
         type: Object,
         default: () => ({})
       },

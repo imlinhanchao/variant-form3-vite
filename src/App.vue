@@ -1,24 +1,13 @@
 <template>
   <div id="app">
-    <VFormDesigner ref="vfDesignerRef" :global-dsv="globalDsv" :custom-widgets="customWidgets">
+    <VFormDesigner ref="vfDesignerRef" :global-dsv="globalDsv" :custom-widgets="customWidgets" :custom-Events="customEvents">
       <!--
       <template #customToolButtons>
         <el-button type="text" @click="doTest">测试btn</el-button>
       </template>
       -->
       <template #custom-upload-widget="scoped">
-        <el-upload
-          class="upload-demo"
-          v-bind="scoped"
-          :on-preview="handlePreview"
-          :on-remove="handleRemove"
-          :before-remove="beforeRemove"
-          :on-success="handleSuccess"
-          :on-error="handleError"
-          :file-list="fileList"
-          :auto-upload="false">
-          <el-button>上传</el-button>
-        </el-upload>
+        <Custom v-bind="scoped" />
       </template>
       <template #autoUpload-editor="{ optionModel }">
         <el-form-item label="自动上传" label-width="150px">
@@ -31,11 +20,13 @@
 
 <script>
 import VFormDesigner from './components/form-designer/index.vue'
+import Custom from './custom.vue'
 
 export default {
   name: 'App',
   components: {
     VFormDesigner,
+    Custom,
   },
   data () {
     return {
@@ -43,6 +34,9 @@ export default {
       globalDsv: {
         testApiHost: 'http://www.test.com/api',
         testPort: 8080,
+      },
+      customEvents: {
+        onConfirm: ['users'],
       },
       customWidgets: [{
         name: '自定义上传',
@@ -83,7 +77,7 @@ export default {
           onFileRemove: '',
           onValidate: '',
           onChange: '',
-          onConfirm: ['users'],
+          onConfirm: '',
         }
       }]
     }

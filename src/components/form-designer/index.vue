@@ -18,7 +18,7 @@
 
       <el-container class="center-layout-container">
         <el-header class="toolbar-header">
-          <toolbar-panel :designer="designer" :global-dsv="globalDsv" ref="toolbarRef">
+          <toolbar-panel :custom-events="customEvents" :designer="designer" :global-dsv="globalDsv" ref="toolbarRef">
             <template #customToolButtons>
               <slot name="customToolButtons" :designer="designer" :global-dsv="globalDsv"></slot>
             </template>
@@ -29,7 +29,7 @@
         </el-header>
         <el-main class="form-widget-main">
           <el-scrollbar class="container-scroll-bar" :style="{height: scrollerHeight}">
-            <v-form-widget :designer="designer" :form-config="designer.formConfig" :global-dsv="globalDsv" ref="formRef">
+            <v-form-widget :custom-events="customEvents" :designer="designer" :form-config="designer.formConfig" :global-dsv="globalDsv" ref="formRef">
               <template v-for="slotName in Object.keys($slots).filter(s => s.endsWith('-widget'))" #[slotName]="scope">
                 <slot :name="slotName" v-bind="scope"></slot>
               </template>
@@ -39,7 +39,7 @@
       </el-container>
 
       <el-aside>
-        <setting-panel :designer="designer" :selected-widget="designer.selectedWidget"
+        <setting-panel :custom-events="customEvents" :designer="designer" :selected-widget="designer.selectedWidget"
                        :form-config="designer.formConfig" :global-dsv="globalDsv" @edit-event-handler="testEEH">
           <template v-for="slotName in Object.keys($slots).filter(s => s.endsWith('-editor'))" #[slotName]="scope">
             <slot :name="slotName" v-bind="scope"></slot>
@@ -118,6 +118,11 @@
       customWidgets: {
         type: Array,
         default: () => []
+      },
+
+      customEvents: {
+        type: Object,
+        default: () => ({})
       },
 
       /* 全局数据源变量 */

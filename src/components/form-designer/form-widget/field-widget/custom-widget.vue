@@ -7,12 +7,17 @@
         ref="fieldEditor" 
         v-bind="field.options" 
         :size="widgetSize" 
+        :model-value="fieldModel"
+        @update:modelValue="(val) => fieldModel = val"
         @change="handleOnChange" 
         @click="handleButtonWidgetClick"
         @focus="handleFocusCustomEvent"
         @blur="handleBlurCustomEvent"
         @input="handleInputCustomEvent"
-        @append-button-click="emitAppendButtonClick"
+        :on-exceed="handleFileExceed" 
+        :before-upload="beforeFileUpload"
+        :on-success="handleFileUpload" 
+        :on-error="handleUploadError"
       >
       </slot>
     </section>
@@ -35,6 +40,10 @@
       parentList: Array,
       indexOfParentList: Number,
       designer: Object,
+      customEvents: {
+        type: Object,
+        default: () => ({})
+      },
 
       designState: {
         type: Boolean,
@@ -75,6 +84,7 @@
     created() {
       /* 注意：子组件mounted在父组件created之后、父组件mounted之前触发，故子组件mounted需要用到的prop
          需要在父组件created中初始化！！ */
+      
       this.initOptionItems()
       this.initFieldModel()
       this.registerToRefList()
@@ -86,6 +96,28 @@
 
     mounted() {
       this.handleOnMounted()
+      Object.keys(this.field.options).filter(key => key.startsWith('on') && !["onCreated",
+        "onMounted",
+        "onClick",
+        "onInput",
+        "onChange",
+        "onFocus",
+        "onBlur",
+        "onRemoteQuery",
+        "onBeforeUpload",
+        "onUploadSuccess",
+        "onUploadError",
+        "onFileRemove",
+        "onValidate"].includes(key)
+      ).forEach(key => {
+        if (typeof this.field.options[key] == 'string') {
+          const onHandle = new Function(...(this.customEvents[key] || []), this.field.options[key]);
+          this.field.options[key] = (...args) => {
+            onHandle.call(this, ...args);
+          }
+        }
+      })
+
     },
 
     beforeUnmount() {
