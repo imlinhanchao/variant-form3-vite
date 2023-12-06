@@ -15,7 +15,7 @@
 执行
 
 ```bash
-npm i @byd/byd-vform3
+npm i @div11/byd-vform3
 ```
 
 ## 使用
@@ -29,8 +29,8 @@ import App from './App.vue'
 import ElementPlus from 'element-plus'  //引入element-plus库
 import 'element-plus/dist/index.css'  //引入element-plus样式
 
-import VForm3 from 'byd-vform3'  //引入VForm 3库
-import 'byd-vform3/dist/designer.style.css'  //引入VForm3样式
+import VForm3 from '@div11/byd-vform3'  //引入VForm 3库
+import '@div11/byd-vform3/dist/designer.style.css'  //引入VForm3样式
 
 const app = createApp(App)
 app.use(ElementPlus)  //全局注册element-plus
