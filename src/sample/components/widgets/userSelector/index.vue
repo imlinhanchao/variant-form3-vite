@@ -1,6 +1,5 @@
 <script setup lang="ts" name="userSelector">
-  import ButtonPlus from '@/components/Button';
-  import UserDialoger from '@/components/UserDialoger/index.vue';
+  import { defineProps, defineEmits, defineExpose, ref, watch, onMounted, computed } from 'vue';
 
   const props = withDefaults(
     defineProps<{
@@ -39,9 +38,10 @@
     },
   );
 
-  const userRef = ref<InstanceType<typeof UserDialoger> | null>();
+  // const userRef = ref<InstanceType<typeof UserDialoger> | null>();
   function open() {
-    userRef.value?.open(data.value || []);
+    // userRef.value?.open(data.value || []);
+    addUsers([{ empNumber: '000000', empName: '测试' }])
   }
   function addUsers(users) {
     data.value = users.map((u) => ({
@@ -54,7 +54,7 @@
 
 <template>
   <section>
-    <ButtonPlus
+    <el-button
       title="选择用户"
       type="primary"
       icon="el-icon-circle-plus-filled"
@@ -67,6 +67,6 @@
         <span>{{ tag.empName }} ({{ tag.empNumber }})</span>
       </el-tag>
     </template>
-    <UserDialoger ref="userRef" @confirm="addUsers" :multiple="userMultiple" />
+    <!-- <UserDialoger ref="userRef" @confirm="addUsers" :multiple="userMultiple" /> -->
   </section>
 </template>
