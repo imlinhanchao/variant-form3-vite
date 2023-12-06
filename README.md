@@ -9,7 +9,7 @@
 ## 安装
 修改 `.npmrc` 文件，添加如下内容：
 ```bash
-@byd:registry=http://hub.byd.com:9081/repository/npm-local
+@div11:registry=http://hub.byd.com:9081/repository/npm-local
 ```
 
 执行
