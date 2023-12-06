@@ -8,7 +8,7 @@
         v-bind="{ ...field.options, ...eventHandler }" 
         :size="widgetSize" 
         :model-value="fieldModel"
-        @update:modelValue="(val) => fieldModel = val"
+        @update:modelValue="fieldValueUpdate"
         @change="handleOnChange" 
         @click="handleButtonWidgetClick"
         @focus="handleFocusCustomEvent"
@@ -29,6 +29,7 @@
   import emitter from '@/utils/emitter'
   import i18n from "@/utils/i18n";
   import fieldMixin from "@/components/form-designer/form-widget/field-widget/fieldMixin";
+  import {deepClone} from "@/utils/util";
 
   export default {
     name: "custom-widget",
@@ -126,7 +127,12 @@
     },
 
     methods: {
-
+      fieldValueUpdate(val) {
+        let oldValue = deepClone(val)
+        this.fieldModel = val;
+        this.syncUpdateFormModel(this.fieldModel)
+        this.emitFieldDataChange(this.fieldModel, oldValue)
+      }
     }
   }
 </script>
