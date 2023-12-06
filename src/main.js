@@ -15,6 +15,7 @@ import ContainerItems from '@/components/form-render/container-item/index'
 import { addDirective } from '@/utils/directive'
 import { installI18n } from '@/utils/i18n'
 import { loadExtension } from '@/extension/extension-loader'
+import vForm3 from '../install'
 
 if (typeof window !== 'undefined') {
   window.axios = axios
@@ -23,6 +24,7 @@ if (typeof window !== 'undefined') {
 const vfApp = createApp(App)
 
 vfApp.use(ElementPlus)
+vfApp.use(vForm3)
 registerIcon(vfApp)
 vfApp.component('draggable', Draggable)
 addDirective(vfApp)

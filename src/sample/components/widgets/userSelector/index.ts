@@ -5,8 +5,9 @@ export default Widgets;
 export const config = {
   name: '用户选择器',
   type: 'userSelector',
-  icon: 'byd-user',
+  icon: 'custom-search',
   formItemFlag: true,
+  dataType: 'string',
   options: {
     name: '',
     label: '',
@@ -18,7 +19,7 @@ export const config = {
     hidden: false,
     required: false,
     requiredHint: '',
-    userMultiple: false,
+    userMultiple: true,
     //-------------------
     customClass: '', //自定义css类名
     labelIconClass: null,
