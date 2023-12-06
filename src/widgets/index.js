@@ -1,5 +1,7 @@
-import widget from './widgets';
+import widgets from './widgets';
+import editors from './editors';
 
 export default {
-  ...widget,
+  ...widgets,
+  ...editors
 };

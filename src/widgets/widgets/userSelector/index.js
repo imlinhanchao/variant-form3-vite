@@ -1,11 +1,11 @@
-import Widgets from './widget.vue';
+import Widgets from './index.vue';
 
 export default Widgets;
 
 export const config = {
   name: '用户选择器',
   type: 'userSelector',
-  icon: 'custom-search',
+  icon: 'byd-user',
   formItemFlag: true,
   options: {
     name: '',
@@ -18,6 +18,7 @@ export const config = {
     hidden: false,
     required: false,
     requiredHint: '',
+    userMultiple: false,
     //-------------------
     customClass: '', //自定义css类名
     labelIconClass: null,
