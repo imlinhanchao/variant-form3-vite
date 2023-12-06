@@ -1,6 +1,6 @@
 # Vue 3低代码表单组件
 
-一款高效的 Vue 3 低代码表单，可视化设计。基于 [variant-form3](https://github.com/vform666/variant-form3-vite) 项目二次开发，感谢原作者的无私奉献。新增了通过插槽自定义表单组件的功能（使用示例见 [sample](./sample) 文件夹）。
+一款高效的 Vue 3 低代码表单，可视化设计。基于 [variant-form3](https://github.com/vform666/variant-form3-vite) 项目二次开发，感谢原作者的无私奉献。新增了通过插槽自定义表单组件的功能（使用示例见 [sample](./src/sample) 文件夹）。
 
 ![image](./public/vform_demo.gif)
 
