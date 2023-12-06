@@ -1,116 +1,49 @@
-# Variant Form 3 For Vue 3.x
-#### 一款高效的Vue 3低代码表单，可视化设计，一键生成源码，享受更多摸鱼时间。
+# Vue 3低代码表单组件
 
-![image](https://ks3-cn-beijing.ksyuncs.com/vform-static/img/vform_demo.gif)
+一款高效的 Vue 3 低代码表单，可视化设计。基于 [variant-form3](https://github.com/vform666/variant-form3-vite) 项目二次开发，感谢原作者的无私奉献。新增了通过插槽自定义表单组件的功能（使用示例见 App.vue）。
 
-<br/>
+![image](./public/vform_demo.gif)
 
-### 立即体验VForm 3
-[在线Demo](http://120.92.142.115:81/vform3/)
+[在线示例](https://div11_tst.byd.com/rd_system/#/form/tool?__full__) | [B站视频](https://space.bilibili.com/626932375) | [官方文档](https://vform.librejo.cn/visualdev/vform3)
 
-### 🎉🎉<mark>基于VForm3的全栈低代码平台已发布</mark>🎉🎉
-[美乐低代码——立即进入](https://melecode.com/)
-
-### 立即体验VForm 3 Pro高级版（提供商业支持）
-[VForm 3 Pro Demo](https://www.vform666.com/pro/)
-
-### 视频教程集合：
-[B站观看](https://space.bilibili.com/626932375)
- 
-### 适合Vue 2的版本看这里
-[点此查看](https://gitee.com/vdpadmin/variant-form)
- 
-### 友情链接
-[Fantastic-admin](https://hooray.gitee.io/fantastic-admin/) —— 一款开箱即用的 Vue 中后台管理系统框架（支持Vue2/Vue3）
- 
-[REBUILD](https://getrebuild.com/) —— 高度可定制化的企业管理系统
-
-### 功能一览
-```
-> 拖拽式可视化表单设计；
-> 支持PC、Pad、H5三种布局；
-> 支持运行时动态加载表单；
-> 支持表单复杂交互控制；
-> 支持自定义CSS样式；
-> 支持自定义校验逻辑；
-> 支持国际化多语言；
-> 可导出Vue组件、HTML源码；
-> 可导出Vue的SFC单文件组件；
-> 支持开发自定义组件；
-> 支持响应式自适应布局；
-> 支持VS Code插件；
-> 更多功能等你探究...；
-```
-
-### 安装依赖
-```
-npm install --registry=https://registry.npm.taobao.org
-```
-
-### 开发调试
-```
-npm run serve
-```
-
-### 生产打包
-```
-npm run build
-```
-
-### 表单设计器 + 表单渲染器打包
-```
-npm run lib
-```
-
-### 表单渲染器打包
-```
-npm run lib-render
-```
-
-### 浏览器兼容性
-```Chrome（及同内核的浏览器如QQ浏览器、360浏览器等等），Firefox，Safari```
-
-<br/>
-
-### 跟Vue 3.x项目集成
-
-<br/>
-
-#### 1. 安装包
+## 安装
+修改 `.npmrc` 文件，添加如下内容：
 ```bash
-npm i vform3-builds
+@byd:registry=http://hub.byd.com:9081/repository/npm-local
 ```
-或
+
+执行
+
 ```bash
-yarn add vform3-builds
+npm i @byd/byd-vform3
 ```
 
-<br/>
+## 使用
 
-#### 2. 引入并全局注册VForm 3组件
-```
+- 安装包
+
+```typescript
 import { createApp } from 'vue'
 import App from './App.vue'
 
 import ElementPlus from 'element-plus'  //引入element-plus库
 import 'element-plus/dist/index.css'  //引入element-plus样式
 
-import VForm3 from 'vform3-builds'  //引入VForm 3库
-import 'vform3-builds/dist/designer.style.css'  //引入VForm3样式
+import VForm3 from 'byd-vform3'  //引入VForm 3库
+import 'byd-vform3/dist/designer.style.css'  //引入VForm3样式
 
 const app = createApp(App)
 app.use(ElementPlus)  //全局注册element-plus
-app.use(VForm3)  //全局注册VForm 3(同时注册了v-form-designer和v-form-render组件)
+app.use(VForm3)  //全局注册VForm 3 (同时注册了v-form-designer和v-form-render组件)
 
 app.mount('#app')
 ```
 
-<br/>
+- 使用表单设计器
 
-#### 3. 在Vue 3.x模板中使用表单设计器组件
-```bash
+```vue
 <template>
-<v-form-designer ref="vfdRef"></v-form-designer>
+  <v-form-designer ref="vfdRef"></v-form-designer>
 </template>
 
 <script setup>
@@ -119,15 +52,16 @@ const vfdRef = ref(null)
 
 <style lang="scss">
 body {
-margin: 0;  /* 如果页面出现垂直滚动条，则加入此行CSS以消除之 */
+  margin: 0;  /* 如果页面出现垂直滚动条，则加入此行CSS以消除之 */
 }
 </style>
 ```
 
 <br/>
 
-#### 4. 在Vue 3.x模板中使用表单渲染器组件
-```html
+- 表单渲染器组件
+
+```vue
 <template>
 <div>
  <v-form-render :form-json="formJson" :form-data="formData" :option-data="optionData" ref="vFormRef">
@@ -155,24 +89,3 @@ const submitForm = () => {
 }
 </script>
 ```
-
-<br/>
-
-### 资源链接
-<hr>
-
-文档官网：<a href="https://www.vform666.com/" target="_blank">https://www.vform666.com/</a>
-
-在线演示：<a href="http://120.92.142.115:81/vform3/" target="_blank">http://120.92.142.115:81/vform3/</a>
-
-Github仓库：<a href="https://github.com/vform666/variant-form3-vite" target="_blank">https://github.com/vform666/variant-form3-vite</a>
-
-Gitee仓库：<a href="https://gitee.com/vdpadmin/variant-form3-vite" target="_blank">https://gitee.com/vdpadmin/variant-form3-vite</a>
-
-更新日志：<a href="https://www.vform666.com/changelog.html" target="_blank">https://www.vform666.com/changelog.html</a>
-
-订阅Pro版：<a href="https://www.vform666.com/pro/" target="_blank">https://www.vform666.com/pro/</a>
-
-技术交流群：扫如下二维码加群
-
-![image](https://vform2022.ks3-cn-beijing.ksyuncs.com/vchat_qrcode.png)

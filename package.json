@@ -1,12 +1,13 @@
 {
-  "name": "@imlinhanchao/variant-form3",
-  "version": "3.0.13",
+  "name": "@byd/byd-vform3",
+  "version": "3.0.15",
   "private": false,
   "scripts": {
     "serve": "vite",
-    "build": "vite build",
-    "lib": "vite build --config vite-lib.config.js",
-    "lib-render": "vite build --config vite-lib-render.config.js",
+    "prebuild": "npm run lib && npm run lib-render",
+    "build": "node build/build.js",
+    "lib": "vite build --config build/vite-lib.config.js",
+    "lib-render": "vite build --config build/vite-lib-render.config.js",
     "preview": "vite preview"
   },
   "files": [
@@ -14,8 +15,19 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/imlinhanchao/variant-form3-vite.git"
+    "url": "git+http://code.byd.com.cn/ShiYiShiYeBuShuZiGuiHuaKe/byd-vform3.git"
   },
+  "publishConfig": {
+    "registry": "http://hub.byd.com:9081/repository/npm-local"
+  },
+  "description": "VForm 3 Online Form Designer",
+  "keywords": [
+    "variant-form",
+    "vform",
+    "element-ui",
+    "form-designer"
+  ],
+  "main": "dist/designer.umd.js",
   "dependencies": {
     "@element-plus/icons-vue": "^0.2.4",
     "axios": "^0.24.0",
