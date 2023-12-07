@@ -3,11 +3,11 @@
                      :parent-widget="parentWidget" :parent-list="parentList" :index-of-parent-list="indexOfParentList"
                      :sub-form-row-index="subFormRowIndex" :sub-form-col-index="subFormColIndex" :sub-form-row-id="subFormRowId">
     <!-- el-upload增加:name="field.options.name"后，会导致又拍云上传失败！故删除之！！ -->
-    <el-upload ref="fieldEditor" :disabled="field.options.disabled"
+    <el-upload ref="fieldEditor" :disabled="field.options.disabled || isReadMode"
                :action="realUploadURL" :headers="uploadHeaders" :data="uploadData"
                :with-credentials="field.options.withCredentials"
                :multiple="field.options.multipleSelect" :file-list="fileList" :show-file-list="field.options.showFileList"
-               list-type="picture-card" :class="{'hideUploadDiv': uploadBtnHidden}"
+               list-type="picture-card" :class="{'hideUploadDiv': uploadBtnHidden || isReadMode}"
                :limit="field.options.limit" :on-exceed="handlePictureExceed"
                :before-upload="beforePictureUpload" :on-preview="handlePictureCardPreview"
                :on-success="handlePictureUpload" :on-error="handleUploadError" >
@@ -49,6 +49,15 @@
       </template>
       <div class="uploader-icon"><svg-icon icon-class="el-plus" /></div>
     </el-upload>
+
+    <div v-if="showPreviewDialogFlag" v-drag="['.drag-dialog.el-dialog', '.drag-dialog .el-dialog__header']">
+      <el-dialog title="" v-model="showPreviewDialogFlag"
+                 append-to-body width="60%"
+                 :show-close="true" custom-class="drag-dialog small-padding-dialog"
+                 :close-on-click-modal="true" :close-on-press-escape="true" :destroy-on-close="true">
+        <img :src="previewUrl" style="width: 100%" alt="" />
+      </el-dialog>
+    </div>
   </form-item-wrapper>
 </template>
 
@@ -113,6 +122,7 @@
         uploadBtnHidden: false,
 
         previewIndex: 1,  // 初始预览图像索引
+        showPreviewDialogFlag: false,
       }
     },
     computed: {
@@ -159,6 +169,11 @@
       handlePictureExceed() {
         let uploadLimit = this.field.options.limit
         this.$message.warning( this.i18nt('render.hint.uploadExceed').replace('${uploadLimit}', uploadLimit) )
+      },
+
+      handlePicturePreview(file) {
+        this.previewUrl = file.url
+        this.showPreviewDialogFlag = true
       },
 
       beforePictureUpload(file) {

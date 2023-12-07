@@ -64,6 +64,7 @@ const COMMON_PROPERTIES = {
   //容器
   'showBlankRow'       :            'showBlankRow-editor',
   'showRowNumber'      :            'showRowNumber-editor',
+  'actionColumnPosition':           'actionColumnPosition-editor',
   'cellWidth'          :            'cellWidth-editor',
   'cellHeight'         :            'cellHeight-editor',
   'colHeight'          :            'colHeight-editor',
@@ -74,6 +75,21 @@ const COMMON_PROPERTIES = {
   'offset'             :            'offset-editor',
   'push'               :            'push-editor',
   'pull'               :            'pull-editor',
+  'title'              :            'title-editor',
+  'width'              :            'width-editor',
+  'fullscreen'         :            'fullscreen-editor',
+  'showModal'          :            'showModal-editor',
+  'showClose'          :            'showClose-editor',
+  'closeOnClickModal'  :            'closeOnClickModal-editor',
+  'closeOnPressEscape' :            'closeOnPressEscape-editor',
+  'center'             :            'center-editor',
+  'direction'          :            'direction-editor',
+  'readMode'           :            'readMode-editor',
+  'disabledMode'       :            'disabledMode-editor',
+  'okButtonLabel'      :            'okButtonLabel-editor',
+  'okButtonHidden'     :            'okButtonHidden-editor',
+  'cancelButtonLabel'  :            'cancelButtonLabel-editor',
+  'cancelButtonHidden' :            'cancelButtonHidden-editor',
 
 }
 
@@ -131,11 +147,31 @@ const EVENT_PROPERTIES = {
   'onAppendButtonClick':           'onAppendButtonClick-editor',
 
   //容器
-  'onSubFormRowAdd'   :            'onSubFormRowAdd-editor',
-  'onSubFormRowInsert':            'onSubFormRowInsert-editor',
-  'onSubFormRowDelete':            'onSubFormRowDelete-editor',
-  'onSubFormRowChange':            'onSubFormRowChange-editor',
-
+  'onTabClick'                :            'onTabClick-editor',
+  'onSubFormRowAdd'           :            'onSubFormRowAdd-editor',
+  'onSubFormRowInsert'        :            'onSubFormRowInsert-editor',
+  'onSubFormRowDelete'        :            'onSubFormRowDelete-editor',
+  'onSubFormRowChange'        :            'onSubFormRowChange-editor',
+  'onPageSizeChange'          :            'onPageSizeChange-editor',
+  'onCurrentPageChange'       :            'onCurrentPageChange-editor',
+  'onSelectionChange'         :            'onSelectionChange-editor',
+  'onHideOperationButton'     :            'onHideOperationButton-editor',
+  'onDisableOperationButton'  :            'onDisableOperationButton-editor',
+  'onGetOperationButtonLabel' :            'onGetOperationButtonLabel-editor',
+  'onOperationButtonClick'    :            'onOperationButtonClick-editor',
+  'onHeaderClick'             :            'onHeaderClick-editor',
+  'onRowClick'                :            'onRowClick-editor',
+  'onRowDoubleClick'          :            'onRowDoubleClick-editor',
+  'onCellClick'               :            'onCellClick-editor',
+  'onCellDoubleClick'         :            'onCellDoubleClick-editor',
+  'onGetRowClassName'         :            'onGetRowClassName-editor',
+  'onGetSpanMethod'           :            'onGetSpanMethod-editor',
+  'onOkButtonClick'           :            'onOkButtonClick-editor',
+  'onCancelButtonClick'       :            'onCancelButtonClick-editor',
+  'onDialogOpened'            :            'onDialogOpened-editor',
+  'onDialogBeforeClose'       :            'onDialogBeforeClose-editor',
+  'onDrawerOpened'            :            'onDrawerOpened-editor',
+  'onDrawerBeforeClose'       :            'onDrawerBeforeClose-editor',
 }
 
 const CUSTOM_PROPERTIES = {

@@ -5,7 +5,7 @@
     <section class="custom-section">
       <slot 
         ref="fieldEditor" 
-        v-bind="{ ...field.options, ...eventHandler }" 
+        v-bind="{ ...field.options, ...eventHandler, isReadMode }" 
         :size="widgetSize" 
         :model-value="fieldModel"
         @update:modelValue="fieldValueUpdate"

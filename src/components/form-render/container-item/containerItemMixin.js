@@ -1,4 +1,4 @@
-import { traverseFieldWidgetsOfContainer } from "@/utils/util";
+import {deepClone, traverseFieldWidgetsOfContainer, traverseWidgetsOfContainer} from "@/utils/util";
 
 export default {
   inject: ['getFormConfig', 'getGlobalDsv'],
@@ -20,6 +20,19 @@ export default {
   },
 
   methods: {
+    cloneWidgetSchema(widget) {
+      return deepClone(widget)
+      /**
+       * 注意：在v-for循环中，必须保证克隆对象与原对象完全一致，修改克隆对象任何属性，
+       * 都会触发组件的beforeDestroy事件钩子！！！
+       */
+
+
+      // let newWidgetSchema = deepClone(widget)
+      // newWidgetSchema.id = widget.type + generateId()
+      // return newWidgetSchema
+    },
+
     unregisterFromRefList() {  //销毁容器组件时注销组件ref
       if ((this.refList !== null) && !!this.widget.options.name) {
         let oldRefName = this.widget.options.name
@@ -54,6 +67,30 @@ export default {
       }
 
       traverseFieldWidgetsOfContainer(this.widget, clearRulesFn)
+    },
+
+    /**
+     * 禁用或启用容器组件（包含容器内部的所有组件）
+     * @param flag
+     */
+    setDisabled(flag) {
+      const fwHandler = (fw) => {
+        const fwName = fw.options.name
+        const fwRef = this.getWidgetRef(fwName)
+        if (!!fwRef && !!fwRef.setDisabled) {
+          fwRef.setDisabled(flag)
+        }
+      }
+      const cwHandler = (cw) => {
+        const cwName = cw.options.name
+        const cwRef = this.getWidgetRef(cwName)
+        if (!!cwRef && !!cwRef.setDisabled) {
+          cwRef.setDisabled(flag)
+        }
+      }
+      traverseWidgetsOfContainer(this.widget, fwHandler, cwHandler)
+
+      //注意：单行子表单、多行子表单容器的setDisabled方法由单行子表单、多行子表单组件自己实现！！
     },
 
     activeTab(tabIndex) { //tabIndex从0计数
@@ -104,24 +141,50 @@ export default {
       return !this.rowIdData ? 0 : this.rowIdData.length
     },
 
-    disableSubFormRow(rowIndex) {
-      this.widget.widgetList.forEach(subWidget => {
-        let swRefName = subWidget.options.name + '@row' + this.rowIdData[rowIndex]
-        let foundSW = this.getWidgetRef(swRefName)
-        if (!!foundSW) {
-          foundSW.setDisabled(true)
+    setGridSubFormRowDisabled(rowId, disabledFlag) {
+      const fwHandler = (fw) => {
+        const fwName = fw.options.name + '@row' + rowId
+        const fwRef = this.getWidgetRef(fwName)
+        if (!!fwRef && !!fwRef.setDisabled) {
+          fwRef.setDisabled(disabledFlag)
         }
-      })
+      }
+      const cwHandler = (cw) => {
+        const cwName = cw.options.name + '@row' + rowId
+        const cwRef = this.getWidgetRef(cwName)
+        if (!!cwRef && !!cwRef.setDisabled) {
+          cwRef.setDisabled(disabledFlag)
+        }
+      }
+      traverseWidgetsOfContainer(this.widget, fwHandler, cwHandler)
+    },
+
+    disableSubFormRow(rowIndex) {
+      if (this.widget.type === 'sub-form') {
+        this.widget.widgetList.forEach(subWidget => {
+          let swRefName = subWidget.options.name + '@row' + this.rowIdData[rowIndex]
+          let foundSW = this.getWidgetRef(swRefName)
+          if (!!foundSW && !!foundSW.setDisabled) {
+            foundSW.setDisabled(true)
+          }
+        })
+      } else if (this.widget.type === 'grid-sub-form') {
+        this.setGridSubFormRowDisabled(this.rowIdData[rowIndex], true)
+      }
     },
 
     enableSubFormRow(rowIndex) {
-      this.widget.widgetList.forEach(subWidget => {
-        let swRefName = subWidget.options.name + '@row' + this.rowIdData[rowIndex]
-        let foundSW = this.getWidgetRef(swRefName)
-        if (!!foundSW) {
-          foundSW.setDisabled(false)
-        }
-      })
+      if (this.widget.type === 'sub-form') {
+        this.widget.widgetList.forEach(subWidget => {
+          let swRefName = subWidget.options.name + '@row' + this.rowIdData[rowIndex]
+          let foundSW = this.getWidgetRef(swRefName)
+          if (!!foundSW && !!foundSW.setDisabled) {
+            foundSW.setDisabled(false)
+          }
+        })
+      } else if (this.widget.type === 'grid-sub-form') {
+        this.setGridSubFormRowDisabled(this.rowIdData[rowIndex], false)
+      }
     },
 
     disableSubForm() {
@@ -139,6 +202,60 @@ export default {
       if (this.rowIdData.length > 0) {
         this.rowIdData.forEach((dataRow, rIdx) => {
           this.enableSubFormRow(rIdx)
+        })
+      }
+
+      //启用3个操作按钮
+      this.actionDisabled = false
+    },
+
+    disableGridSubFormRow(rowIndex) {
+      let gsfFWList = []
+      let fieldListFn = (fw) => {
+        gsfFWList.push(fw)
+      }
+      traverseFieldWidgetsOfContainer(this.widget, fieldListFn)
+
+      gsfFWList.forEach(fw => {
+        let swRefName = fw.options.name + '@row' + this.rowIdData[rowIndex]
+        let foundSW = this.getWidgetRef(swRefName)
+        if (!!foundSW && !!foundSW.setDisabled) {
+          foundSW.setDisabled(true)
+        }
+      })
+    },
+
+    enableGridSubFormRow(rowIndex) {
+      let gsfFWList = []
+      let fieldListFn = (fw) => {
+        gsfFWList.push(fw)
+      }
+      traverseFieldWidgetsOfContainer(this.widget, fieldListFn)
+
+      gsfFWList.forEach(fw => {
+        let swRefName = fw.options.name + '@row' + this.rowIdData[rowIndex]
+        let foundSW = this.getWidgetRef(swRefName)
+        if (!!foundSW && !!foundSW.setDisabled) {
+          foundSW.setDisabled(false)
+        }
+      })
+    },
+
+    disableGridSubForm() {
+      if (this.rowIdData.length > 0) {
+        this.rowIdData.forEach((dataRow, rIdx) => {
+          this.disableGridSubFormRow(rIdx)
+        })
+      }
+
+      //禁用3个操作按钮
+      this.actionDisabled = true
+    },
+
+    enableGridSubForm() {
+      if (this.rowIdData.length > 0) {
+        this.rowIdData.forEach((dataRow, rIdx) => {
+          this.enableGridSubFormRow(rIdx)
         })
       }
 

@@ -5,6 +5,8 @@ export default {
       prompt: '提示',
       confirm: '确定',
       cancel: '取消',
+      defaultActiveText: '是',
+      defaultInactiveText: '否',
 
       selectPlaceholder: '请选择',
       timePlaceholder: '选择时间',
@@ -29,6 +31,7 @@ export default {
 
       subFormAction: '操作',
       subFormAddAction: '新增',
+      subFormRowNo: '行号',
       subFormAddActionHint: '新增行',
       insertSubFormRow: '插入行',
       deleteSubFormRow: '删除行',

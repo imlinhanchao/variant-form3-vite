@@ -132,32 +132,28 @@ export const loadRemoteScript = function(srcPath, callback) {  /*加载远程js�
   }
 }
 
-export function traverseFieldWidgets(widgetList, handler, parent = null) {
-  if (!widgetList) {
-    return
-  }
-
+export function traverseFieldWidgets(widgetList, handler, parent = null, staticWidgetsIncluded = false) {
   widgetList.map(w => {
-    if (w.formItemFlag) {
+    if (w.formItemFlag || ((w.formItemFlag === false) && staticWidgetsIncluded)) {
       handler(w, parent)
     } else if (w.type === 'grid') {
       w.cols.map(col => {
-        traverseFieldWidgets(col.widgetList, handler, w)
+        traverseFieldWidgets(col.widgetList, handler, w, staticWidgetsIncluded)
       })
     } else if (w.type === 'table') {
       w.rows.map(row => {
         row.cols.map(cell => {
-          traverseFieldWidgets(cell.widgetList, handler, w)
+          traverseFieldWidgets(cell.widgetList, handler, w, staticWidgetsIncluded)
         })
       })
     } else if (w.type === 'tab') {
       w.tabs.map(tab => {
-        traverseFieldWidgets(tab.widgetList, handler, w)
+        traverseFieldWidgets(tab.widgetList, handler, w, staticWidgetsIncluded)
       })
-    } else if (w.type === 'sub-form') {
-      traverseFieldWidgets(w.widgetList, handler, w)
+    } else if (w.type === 'sub-form' || w.type === 'grid-sub-form') {
+      traverseFieldWidgets(w.widgetList, handler, w, staticWidgetsIncluded)
     } else if (w.category === 'container') {  //自定义容器
-      traverseFieldWidgets(w.widgetList, handler, w)
+      traverseFieldWidgets(w.widgetList, handler, w, staticWidgetsIncluded)
     }
   })
 }
@@ -186,7 +182,7 @@ export function traverseContainerWidgets(widgetList, handler) {
       w.tabs.map(tab => {
         traverseContainerWidgets(tab.widgetList, handler)
       })
-    } else if (w.type === 'sub-form') {
+    } else if (w.type === 'sub-form' || w.type === 'grid-sub-form') {
       traverseContainerWidgets(w.widgetList, handler)
     } else if (w.category === 'container') {  //自定义容器
       traverseContainerWidgets(w.widgetList, handler)
@@ -218,7 +214,7 @@ export function traverseAllWidgets(widgetList, handler) {
       w.tabs.map(tab => {
         traverseAllWidgets(tab.widgetList, handler)
       })
-    } else if (w.type === 'sub-form') {
+    } else if (w.type === 'sub-form' || w.type === 'grid-sub-form') {
       traverseAllWidgets(w.widgetList, handler)
     } else if (w.category === 'container') {  //自定义容器
       traverseAllWidgets(w.widgetList, handler)
@@ -227,7 +223,7 @@ export function traverseAllWidgets(widgetList, handler) {
 }
 
 function handleWidgetForTraverse(widget, handler) {
-  if (!!widget.category) {
+  if (!!widget.category && (widget.category === 'container')) {
     traverseFieldWidgetsOfContainer(widget, handler)
   } else if (widget.formItemFlag) {
     handler(widget)
@@ -260,7 +256,7 @@ export function traverseFieldWidgetsOfContainer(con, handler) {
         handleWidgetForTraverse(cw, handler)
       })
     })
-  } else if (con.type === 'sub-form') {
+  } else if (con.type === 'sub-form' || con.type === 'grid-sub-form') {
     con.widgetList.forEach(cw => {
       handleWidgetForTraverse(cw, handler)
     })
@@ -271,12 +267,59 @@ export function traverseFieldWidgetsOfContainer(con, handler) {
   }
 }
 
+function handleContainerTraverse(widget, fieldHandler, containerHandler) {
+  if (!!widget.category && (widget.category === 'container')) {
+    traverseWidgetsOfContainer(widget, fieldHandler, containerHandler)
+  } else if (widget.formItemFlag) {
+    fieldHandler(widget)
+  }
+}
+
+/**
+ * 遍历容器内部的字段组件和容器组件
+ * @param con
+ * @param fieldHandler
+ * @param containerHandler
+ */
+export function traverseWidgetsOfContainer(con, fieldHandler, containerHandler) {
+  if (con.type === 'grid') {
+    con.cols.forEach(col => {
+      col.widgetList.forEach(cw => {
+        handleContainerTraverse(cw, fieldHandler, containerHandler)
+      })
+    })
+  } else if (con.type === 'table') {
+    con.rows.forEach(row => {
+      row.cols.forEach(cell => {
+        cell.widgetList.forEach(cw => {
+          handleContainerTraverse(cw, fieldHandler, containerHandler)
+        })
+      })
+    })
+  } else if (con.type === 'tab') {
+    con.tabs.forEach(tab => {
+      tab.widgetList.forEach(cw => {
+        handleContainerTraverse(cw, fieldHandler, containerHandler)
+      })
+    })
+  } else if (con.type === 'sub-form' || con.type === 'grid-sub-form') {
+    con.widgetList.forEach(cw => {
+      handleContainerTraverse(cw, fieldHandler, containerHandler)
+    })
+  } else if (con.category === 'container') {  //自定义容器
+    con.widgetList.forEach(cw => {
+      handleContainerTraverse(cw, fieldHandler, containerHandler)
+    })
+  }
+}
+
 /**
  * 获取所有字段组件
  * @param widgetList
+ * @param staticWidgetsIncluded 是否包含按钮等静态组件，默认不包含
  * @returns {[]}
  */
-export function getAllFieldWidgets(widgetList) {
+export function getAllFieldWidgets(widgetList, staticWidgetsIncluded = false) {
   if (!widgetList) {
     return []
   }
@@ -289,7 +332,7 @@ export function getAllFieldWidgets(widgetList) {
       field: w
     })
   }
-  traverseFieldWidgets(widgetList, handlerFn)
+  traverseFieldWidgets(widgetList, handlerFn, null, staticWidgetsIncluded)
 
   return result
 }
@@ -315,6 +358,42 @@ export function getAllContainerWidgets(widgetList) {
   traverseContainerWidgets(widgetList, handlerFn)
 
   return result
+}
+
+export function getFieldWidgetByName(widgetList, fieldName, staticWidgetsIncluded) {
+  let foundWidget = null
+  let handlerFn = (widget) => {
+    if (widget.options.name === fieldName) {
+      foundWidget = widget
+    }
+  }
+
+  traverseFieldWidgets(widgetList, handlerFn, null, staticWidgetsIncluded)
+  return foundWidget
+}
+
+export function getContainerWidgetByName(widgetList, containerName) {
+  let foundContainer = null
+  let handlerFn = (con) => {
+    if (con.options.name === containerName) {
+      foundContainer = con
+    }
+  }
+
+  traverseContainerWidgets(widgetList, handlerFn)
+  return foundContainer
+}
+
+export function getContainerWidgetById(widgetList, containerId) {
+  let foundContainer = null
+  let handlerFn = (con) => {
+    if (con.id === containerId) {
+      foundContainer = con
+    }
+  }
+
+  traverseContainerWidgets(widgetList, handlerFn)
+  return foundContainer
 }
 
 export function copyToClipboard(content, clickEvent, $message, successMsg, errorMsg) {
@@ -362,6 +441,7 @@ export function getDefaultFormConfig() {
     functions: '',  //全局函数
     layoutType: 'PC',
     jsonVersion: 3,
+    dataSources: [],  //数据源集合
 
     onFormCreated: '',
     onFormMounted: '',
@@ -374,4 +454,125 @@ export function buildDefaultFormJson() {
     widgetList: [],
     formConfig: deepClone( getDefaultFormConfig() )
   }
+}
+
+export function cloneFormConfigWithoutEventHandler(formConfig) {
+  let newFC = deepClone(formConfig)
+  newFC.onFormCreated = ''
+  newFC.onFormMounted = ''
+  newFC.onFormDataChange = ''
+
+  return newFC
+}
+
+/**
+ * 转译选择项数据
+ * @param rawData
+ * @param widgetType
+ * @param labelKey
+ * @param valueKey
+ * @returns {[]}
+ */
+export function translateOptionItems(rawData, widgetType, labelKey, valueKey) {
+  if (widgetType === 'cascader') { // 级联选择不转译
+    return deepClone(rawData)
+  }
+
+  let result = []
+  if (!!rawData && (rawData.length > 0)) {
+    rawData.forEach(ri => {
+      result.push({
+        label: ri[labelKey],
+        value: ri[valueKey]
+      })
+    })
+  }
+
+  return result
+}
+
+/**
+ * 组装axios请求配置参数
+ * @param arrayObj
+ * @param DSV
+ * @param VFR
+ * @returns {{}}
+ */
+export function assembleAxiosConfig(arrayObj, DSV, VFR) {
+  let result = {}
+  if (!arrayObj || (arrayObj.length <= 0)) {
+    return result
+  }
+
+  arrayObj.map(ai => {
+    if (ai.type === 'String') {
+      result[ai.name] = String(ai.value)
+    } else if (ai.type === 'Number') {
+      result[ai.name] = Number(ai.value)
+    } else if (ai.type === 'Boolean') {
+      if ((ai.value.toLowerCase() === 'false') || (ai.value === '0')) {
+        result[ai.name] = false
+      } else if ((ai.value.toLowerCase() === 'true') || (ai.value === '1')) {
+        result[ai.name] = true
+      } else {
+        result[ai.name] = null
+      }
+    } else if (ai.type === 'Variable') {
+      result[ai.name] = eval(ai.value)
+    }
+  })
+
+  /* 加入如下两行日志打印代码，是为了防止编译打包时DSV、VFR参数被剔除！！ begin */
+  /* DSV、VFR入参没有在本函数中直接使用到，但在eval表达式中可能被使用到，故需确保DSV、VFR参数始终存在！！ */
+  console.log('test DSV: ', DSV)
+  console.log('test VFR: ', VFR)
+  /* 加入如下两行日志打印代码，是为了防止编译打包时DSV、VFR入参会被剔除！！ end */
+
+  return result
+}
+
+function buildRequestConfig(dataSource, DSV, VFR, isSandbox) {
+  let config = {}
+  if (dataSource.requestURLType === 'String') {
+    config.url = dataSource.requestURL
+  } else {
+    config.url = eval(dataSource.requestURL)
+  }
+  config.method = dataSource.requestMethod
+
+  config.headers = assembleAxiosConfig(dataSource.headers, DSV, VFR)
+  config.params = assembleAxiosConfig(dataSource.params, DSV, VFR)
+  config.data = assembleAxiosConfig(dataSource.data, DSV, VFR)
+
+  let chFn = new Function('config', 'isSandbox', 'DSV', 'VFR', dataSource.configHandlerCode)
+  return chFn.call(null, config, isSandbox, DSV, VFR)
+}
+
+export async function runDataSourceRequest(dataSource, DSV, VFR, isSandbox, $message) {
+  try {
+    let requestConfig = buildRequestConfig(dataSource, DSV, VFR, isSandbox)
+    //console.log('test------', requestConfig)
+    let result = await axios.request(requestConfig)
+    //let result = await axios.create().request(requestConfig)
+
+    let dhFn = new Function('result', 'isSandbox', 'DSV', 'VFR', dataSource.dataHandlerCode)
+    return dhFn.call(null, result, isSandbox, DSV, VFR)
+  } catch (err) {
+    let ehFn = new Function('error', 'isSandbox', 'DSV', '$message', 'VFR', dataSource.errorHandlerCode)
+    ehFn.call(null, err, isSandbox, DSV, $message, VFR)
+    console.error(err)
+  }
+}
+
+export function getDSByName(formConfig, dsName) {
+  let resultDS = null
+  if (!!dsName && !!formConfig.dataSources) {
+    formConfig.dataSources.forEach(ds => {
+      if (ds.uniqueName === dsName) {
+        resultDS = ds
+      }
+    })
+  }
+
+  return resultDS
 }

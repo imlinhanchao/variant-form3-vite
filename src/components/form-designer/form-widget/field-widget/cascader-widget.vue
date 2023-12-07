@@ -2,7 +2,7 @@
   <form-item-wrapper :designer="designer" :field="field" :rules="rules" :design-state="designState"
                      :parent-widget="parentWidget" :parent-list="parentList" :index-of-parent-list="indexOfParentList"
                      :sub-form-row-index="subFormRowIndex" :sub-form-col-index="subFormColIndex" :sub-form-row-id="subFormRowId">
-    <div class="full-width-input">
+    <div class="full-width-input" :class="{'readonly-mode-cascader' : isReadMode}">
       <el-cascader ref="fieldEditor" :options="field.options.optionItems" v-model="fieldModel"
                    :disabled="field.options.disabled"
                    :size="widgetSize"
@@ -10,10 +10,14 @@
                    :filterable="field.options.filterable"
                    :placeholder="field.options.placeholder || i18nt('render.hint.selectPlaceholder')"
                    :show-all-levels="showFullPath"
-                   :props="{ checkStrictly: field.options.checkStrictly, multiple: field.options.multiple, expandTrigger: 'hover' }"
+                   :props="{ checkStrictly: field.options.checkStrictly, multiple: field.options.multiple, expandTrigger: 'hover', value: valueKey, label: labelKey, children: childrenKey }"
+                   @visible-change="hideDropDownOnClick" @expand-change="hideDropDownOnClick"
                    @focus="handleFocusCustomEvent" @blur="handleBlurCustomEvent"
                    @change="handleChangeEvent">
       </el-cascader>
+      <template v-if="isReadMode">
+        <span class="readonly-mode-field">{{contentForReadMode}}</span>
+      </template>
     </div>
   </form-item-wrapper>
 </template>
@@ -65,8 +69,34 @@
       }
     },
     computed: {
+      labelKey() {
+        return this.field.options.labelKey || 'label'
+      },
+
+      valueKey() {
+        return this.field.options.valueKey || 'value'
+      },
+
+      childrenKey() {
+        return this.field.options.childrenKey || 'children'
+      },
+
       showFullPath() {
         return (this.field.options.showAllLevels === undefined) || !!this.field.options.showAllLevels
+      },
+
+      contentForReadMode() {
+        if (!!this.field.options.multiple) {
+          //console.log('test======', this.$refs.fieldEditor.presentTags)
+          const curTags = this.$refs.fieldEditor.presentTags
+          if (!curTags || (curTags.length <= 0)) {
+            return '--'
+          } else {
+            return curTags.map(tagItem => tagItem.text).join(', ')
+          }
+        } else {
+          return this.$refs.fieldEditor.presentText || '--'
+        }
       },
 
     },
@@ -95,6 +125,17 @@
     },
 
     methods: {
+      /* 开启任意级节点可选后，点击radio隐藏下拉框 */
+      hideDropDownOnClick() {
+        setTimeout(() => {
+          document.querySelectorAll(".el-cascader-panel .el-radio").forEach((el) => {
+            el.onclick = () => {
+              console.log('test====', 1111)
+              this.$refs.fieldEditor.popperVisible = false // 单选框部分点击隐藏下拉框
+            }
+          })
+        }, 100)
+      },
 
     }
   }
@@ -109,6 +150,10 @@
     :deep(.el-cascader) {
       width: 100% !important;
     }
+  }
+
+  .readonly-mode-cascader :deep(.el-cascader) {
+    display: none;
   }
 
 </style>

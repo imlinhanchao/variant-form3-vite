@@ -1,4 +1,4 @@
-const modules = import.meta.glob('./*/index.ts', { eager: true });
+const modules = import.meta.globEager('./*/index.ts');
 const components = {};
 for (const path in modules) {
   const p = path.split('/')[1];

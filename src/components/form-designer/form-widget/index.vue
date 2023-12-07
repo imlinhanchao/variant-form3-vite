@@ -86,9 +86,13 @@
         getGlobalDsv: () => this.globalDsv, // 全局数据源变量
         globalOptionData: this.optionData,
         getOptionData: () => this.optionData,
+        getReadMode: () => false,
         globalModel: {
           formModel: this.formModel,
-        }
+        },
+        getSubFormFieldFlag: () => false,
+        getSubFormName: () => '',
+        getDSResultCache: () => this.dsResultCache,
       }
     },
     inject: ['getDesignerConfig'],
@@ -96,6 +100,7 @@
       return {
         formModel: {},
         widgetRefList: {},
+        dsResultCache: {},
       }
     },
     computed: {
@@ -178,6 +183,7 @@
         }
 
         this.designer.emitHistoryChange()
+        this.designer.emitEvent('field-selected', null)
       },
 
       onDragUpdate() {  /* 在VueDraggable内拖拽组件发生位置变化时会触发update，未发生组件位置变化不会触发！！ */

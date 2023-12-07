@@ -49,8 +49,10 @@
         <div>
           <div class="form-render-wrapper" :class="[layoutType === 'H5' ? 'h5-layout' : (layoutType === 'Pad' ? 'pad-layout' : '')]">
             <VFormRender ref="preForm" :custom-events="customEvents" :form-json="formJson" :form-data="testFormData" :preview-state="true"
-                         :option-data="testOptionData" :global-dsv="designerDsv" @myEmitTest="onMyEmitTest"
+                         :option-data="testOptionData" :global-dsv="designerDsv"
                          @appendButtonClick="testOnAppendButtonClick" @buttonClick="testOnButtonClick"
+                         @dataTableSelectionChange="testDTSC" @operationButtonClick="testOBC"
+                         @myEmitTest="onMyEmitTest"
                          @formChange="handleFormChange">
               <template v-for="slotName in Object.keys($slots).filter(s => s.endsWith('-widget'))" #[slotName]="scope">
                 <slot :name="slotName" v-bind="scope"></slot>
@@ -64,6 +66,7 @@
             <el-button type="primary" @click="resetForm">{{i18nt('designer.hint.resetForm')}}</el-button>
             <el-button type="primary" @click="setFormDisabled">{{i18nt('designer.hint.disableForm')}}</el-button>
             <el-button type="primary" @click="setFormEnabled">{{i18nt('designer.hint.enableForm')}}</el-button>
+            <el-button type="primary" plain @click="switchReadMode">{{i18nt('designer.hint.switchReadMode')}}</el-button>
             <el-button @click="showPreviewDialogFlag = false">{{i18nt('designer.hint.closePreview')}}</el-button>
             <el-button v-if="false" @click="testLoadForm">Test Load</el-button>
             <el-button v-if="false" @click="testSetFormJson">Test SFJ</el-button>
@@ -239,6 +242,7 @@
         showNodeTreeDrawerFlag: false,
 
         nodeTreeData: [],
+        formReadonlyFlag: false,
 
         importTemplate: '',
         jsonContent: '',
@@ -635,6 +639,11 @@
 
       setFormEnabled() {
         this.$refs['preForm'].enableForm()
+      },
+      
+      switchReadMode() {
+        this.formReadonlyFlag = !this.formReadonlyFlag
+        this.$refs['preForm'].setReadMode(this.formReadonlyFlag)
       },
 
       testLoadForm() {

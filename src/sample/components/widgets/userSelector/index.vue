@@ -55,13 +55,9 @@
 <template>
   <section>
     <el-button
-      title="选择用户"
       type="primary"
-      icon="el-icon-circle-plus-filled"
       @click="open"
-      circle
-      link
-    />
+    >选择用户</el-button>
     <template v-for="(tag, i) in data" :key="tag.empNumber">
       <el-tag class="mx-1" @close="data.splice(i, 1)" closable>
         <span>{{ tag.empName }} ({{ tag.empNumber }})</span>

@@ -32,6 +32,5 @@ installI18n(vfApp)
 
 vfApp.use(ContainerWidgets)
 vfApp.use(ContainerItems)
-loadExtension(vfApp)
 
 vfApp.mount('#app')

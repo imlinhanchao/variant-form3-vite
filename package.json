@@ -1,9 +1,9 @@
 {
   "name": "@div11/vform3",
-  "version": "3.0.15",
+  "version": "3.0.16",
   "private": false,
   "scripts": {
-    "serve": "vite",
+    "serve": "vite --host",
     "prebuild": "npm run lib && npm run lib-render",
     "build": "node build/build.js",
     "lib": "vite build --config build/vite-lib.config.js",

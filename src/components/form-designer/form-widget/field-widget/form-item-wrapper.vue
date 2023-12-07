@@ -97,7 +97,7 @@
 
       rules: Array,
     },
-    inject: ['getFormConfig'],
+    inject: ['getFormConfig', 'getSubFormFieldFlag', 'getSubFormName'],
     computed: {
       formConfig() {
         return this.getFormConfig()
@@ -148,11 +148,11 @@
       },
 
       subFormName() {
-        return !!this.parentWidget ? this.parentWidget.options.name : ''
+        return !!this.getSubFormName ? this.getSubFormName() : ''
       },
 
       subFormItemFlag() {
-        return !!this.parentWidget ? this.parentWidget.type === 'sub-form' : false
+        return !!this.getSubFormFieldFlag ? this.getSubFormFieldFlag() : false
       },
 
     },

@@ -283,8 +283,7 @@
 
 <style lang="scss" scoped>
   .color-svg-icon {
-    -webkit-font-smoothing: antialiased;
-    color: #7c7d82;
+    color: $--color-primary;
   }
 
   .side-scroll-bar {

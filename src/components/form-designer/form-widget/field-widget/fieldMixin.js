@@ -1,10 +1,15 @@
-import {deepClone} from "@/utils/util"
+import {deepClone, getDSByName, overwriteObj, runDataSourceRequest, translateOptionItems} from "@/utils/util"
 import FormValidators from '@/utils/validators'
 import eventBus from "@/utils/event-bus"
 
 export default {
-  inject: ['refList', 'getFormConfig', 'getGlobalDsv', 'globalOptionData', 'globalModel', 'getOptionData'],
-
+  inject: ['refList', 'getFormConfig', 'globalOptionData', 'globalModel', 'getOptionData',
+    'getGlobalDsv', 'getReadMode', 'getSubFormFieldFlag', 'getSubFormName', 'getDSResultCache'],
+  data() {
+    return {
+      fieldReadonlyFlag: false
+    }
+  },
   computed: {
     formConfig() {
       return this.getFormConfig()
@@ -15,11 +20,11 @@ export default {
     },
 
     subFormName() {
-      return !!this.parentWidget ? this.parentWidget.options.name : ''
+      return !!this.getSubFormName ? this.getSubFormName() : ''
     },
 
     subFormItemFlag() {
-      return !!this.parentWidget ? this.parentWidget.type === 'sub-form' : false
+      return !!this.getSubFormFieldFlag ? this.getSubFormFieldFlag() : false
     },
 
     formModel: {
@@ -29,9 +34,43 @@ export default {
       }
     },
 
+    isReadMode() {
+      //return this.getReadMode() || this.fieldReadonlyFlag
+      return !!this.getReadMode() ? true : this.fieldReadonlyFlag
+    },
+
+    optionLabel() {
+      if (this.fieldModel === null) {
+        return '--'
+      } else {
+        let resultContent = '--'
+        this.field.options.optionItems.forEach(oItem => {
+          if ((oItem.value === this.fieldModel) || (this.findInArray(this.fieldModel, oItem.value)) !== -1) {
+            resultContent = resultContent === '--' ? oItem.label : resultContent + ' ' + oItem.label
+          }
+        })
+
+        return resultContent
+      }
+    },
+
   },
 
   methods: {
+    findInArray(arrayObject, element) {
+      if (!Array.isArray(arrayObject)) {
+        return -1
+      }
+
+      let foundIdx = -1
+      arrayObject.forEach((aItem, aIdx) => {
+        if (aItem === element) {
+          foundIdx = aIdx
+        }
+      })
+
+      return foundIdx
+    },
 
     //--------------------- 组件内部方法 begin ------------------//
     getPropName() {
@@ -92,8 +131,10 @@ export default {
       if (!!this.fieldModel) {
         if (Array.isArray(this.fieldModel)) {
           this.fileList = deepClone(this.fieldModel)
+          this.uploadBtnHidden = this.fileList.length >= this.field.options.limit
         } else {
           this.fileList.splice(0, 0, deepClone(this.fieldModel))
+          this.uploadBtnHidden = this.field.options.limit <= 1
         }
       }
     },
@@ -115,6 +156,11 @@ export default {
         }
       })
 
+      /* 监听从数据集加载选项事件 */
+      this.on$('loadOptionItemsFromDataSet', (dsName) => {
+        this.loadOptionItemsFromDataSet(dsName)
+      })
+
       this.on$('reloadOptionItems', (widgetNames) => {
         if ((widgetNames.length === 0) || (widgetNames.indexOf(this.field.options.name) > -1)) {
           this.initOptionItems(true)
@@ -124,6 +170,10 @@ export default {
     },
 
     handleOnCreated() {
+      if (!!this.designState) { //设计状态不触发事件
+        return
+      }
+
       if (!!this.field.options.onCreated) {
         let customFunc = new Function(this.field.options.onCreated)
         customFunc.call(this)
@@ -131,6 +181,10 @@ export default {
     },
 
     handleOnMounted() {
+      if (!!this.designState) { //设计状态不触发事件
+        return
+      }
+
       if (!!this.field.options.onMounted) {
         let mountFunc = new Function(this.field.options.onMounted)
         mountFunc.call(this)
@@ -164,13 +218,37 @@ export default {
       }
     },
 
-    initOptionItems(keepSelected) {
+    async initOptionItems(keepSelected) {
       if (this.designState) {
         return
       }
 
       if ((this.field.type === 'radio') || (this.field.type === 'checkbox')
           || (this.field.type === 'select') || (this.field.type === 'cascader')) {
+        /* 首先处理数据源选项加载 */
+        if (!!this.field.options.dsEnabled) {
+          this.field.options.optionItems.splice(0, this.field.options.optionItems.length) // 清空原有选项
+          let curDSName = this.field.options.dsName
+          let curDSetName = this.field.options.dataSetName
+          let curDS = getDSByName(this.formConfig, curDSName)
+          if (!!curDS && !curDSetName) {
+            let gDsv = this.getGlobalDsv() || {}
+            //console.log('Global DSV is: ', gDsv)
+            let localDsv = new Object({})
+            overwriteObj(localDsv, gDsv)
+            localDsv['widgetName'] = this.field.options.name
+            let dsResult = null
+            try {
+              dsResult = await runDataSourceRequest(curDS, localDsv, this.getFormRef(), false, this.$message)
+              this.loadOptions(dsResult)
+            } catch(err) {
+              this.$message.error(err.message)
+            }
+          }
+
+          return;
+        }
+
         /* 异步更新option-data之后globalOptionData不能获取到最新值，改用provide的getOptionData()方法 */
         const newOptionItems = this.getOptionData()
         if (!!newOptionItems && newOptionItems.hasOwnProperty(this.field.options.name)) {
@@ -180,6 +258,29 @@ export default {
             this.loadOptions(newOptionItems[this.field.options.name])
           }
         }
+      }
+    },
+
+    loadOptionItemsFromDataSet(dsName) {
+      if (this.designState) {
+        return
+      }
+
+      if ((this.field.type !== 'radio') && (this.field.type !== 'checkbox')
+          && (this.field.type !== 'select') && (this.field.type !== 'cascader')) {
+        return
+      }
+
+      if (!this.field.options.dsEnabled || !this.field.options.dsName || !this.field.options.dataSetName
+          || (this.field.options.dsName !== dsName)) {
+        return
+      }
+
+      const dataCache = this.getDSResultCache()
+      const dSetName = this.field.options.dataSetName
+      if (!!dataCache && !!dataCache[dsName] && !!dataCache[dsName][dSetName]) {
+        this.field.options.optionItems.splice(0, this.field.options.optionItems.length) // 清空原有选项
+        this.loadOptions( dataCache[dsName][dSetName] )
       }
     },
 
@@ -325,6 +426,10 @@ export default {
     },
 
     handleChangeEvent(value) {
+      if (!!this.designState) { //设计状态不触发事件
+        return
+      }
+
       this.syncUpdateFormModel(value)
       this.emitFieldDataChange(value, this.oldFieldValue)
 
@@ -336,6 +441,10 @@ export default {
     },
 
     handleFocusCustomEvent(event) {
+      if (!!this.designState) { //设计状态不触发事件
+        return
+      }
+
       this.oldFieldValue = deepClone(this.fieldModel)  //保存修改change之前的值
 
       if (!!this.field.options.onFocus) {
@@ -345,6 +454,10 @@ export default {
     },
 
     handleBlurCustomEvent(event) {
+      if (!!this.designState) { //设计状态不触发事件
+        return
+      }
+
       if (!!this.field.options.onBlur) {
         let customFn = new Function('event', this.field.options.onBlur)
         customFn.call(this, event)
@@ -352,6 +465,10 @@ export default {
     },
 
     handleInputCustomEvent(value) {
+      if (!!this.designState) { //设计状态不触发事件
+        return
+      }
+
       this.syncUpdateFormModel(value)
 
       /* 主动触发表单的单个字段校验，用于清除字段可能存在的校验错误提示 */
@@ -378,6 +495,10 @@ export default {
     },
 
     handleOnChange(val, oldVal) {  //自定义onChange事件
+      if (!!this.designState) { //设计状态不触发事件
+        return
+      }
+
       if (!!this.field.options.onChange) {
         let changeFn = new Function('value', 'oldValue', this.field.options.onChange)
         changeFn.call(this, val, oldVal)
@@ -385,6 +506,10 @@ export default {
     },
 
     handleOnChangeForSubForm(val, oldVal, subFormData, rowId) {  //子表单自定义onChange事件
+      if (!!this.designState) { //设计状态不触发事件
+        return
+      }
+
       if (!!this.field.options.onChange) {
         let changeFn = new Function('value', 'oldValue', 'subFormData', 'rowId', this.field.options.onChange)
         changeFn.call(this, val, oldVal, subFormData, rowId)
@@ -405,6 +530,10 @@ export default {
     },
 
     remoteQuery(keyword) {
+      if (!!this.designState) { //设计状态不触发事件
+        return
+      }
+
       if (!!this.field.options.onRemoteQuery) {
         let remoteFn = new Function('keyword', this.field.options.onRemoteQuery)
         remoteFn.call(this, keyword)
@@ -507,6 +636,21 @@ export default {
     setRequired(flag) {
       this.field.options.required = flag
       this.buildFieldRules()
+
+      if (!this.designState && !flag) {  //清除必填校验提示
+        this.clearValidate()
+      }
+    },
+
+    /**
+     * 清除字段校验提示
+     */
+    clearValidate() {
+      if (!!this.designState) {
+        return
+      }
+
+      this.getFormRef().getNativeForm().clearValidate(this.getPropName())
     },
 
     setLabel(newLabel) {
@@ -578,11 +722,27 @@ export default {
     },
 
     /**
-     * 是否子表单内嵌的组件
+     * 是否子表单内嵌的字段组件
      * @returns {boolean}
      */
     isSubFormItem() {
-      return !!this.parentWidget ? this.parentWidget.type === 'sub-form' : false
+      return this.subFormItemFlag
+    },
+
+    /**
+     * 是否子表单内嵌的字段组件
+     * @returns {boolean}
+     */
+    isSubFormField() {
+      return this.subFormItemFlag
+    },
+
+    /**
+     * 设置或取消设置字段只读查看模式
+     * @param readonlyFlag
+     */
+    setReadMode(readonlyFlag = true) {
+      this.fieldReadonlyFlag = readonlyFlag
     },
 
     /**

@@ -5,7 +5,7 @@ export default Widgets;
 export const config = {
   name: '用户选择器',
   type: 'userSelector',
-  icon: 'custom-search',
+  icon: 'byd-user',
   formItemFlag: true,
   dataType: 'string',
   options: {

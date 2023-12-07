@@ -9,7 +9,7 @@
 -->
 
 <template>
-  <el-form :label-position="labelPosition" :size="size" :class="[customClass]" class="render-form"
+  <el-form :label-position="labelPosition" :size="size" :class="[customClass, readModeFlag ? 'readonly-mode-form' : '']" class="render-form"
            :label-width="labelWidth" :validate-on-rule-change="false"
            :model="formDataModel" ref="renderForm"
            @submit.prevent>
@@ -51,15 +51,31 @@
 </template>
 
 <script>
+  import { createVNode, render } from 'vue'
   //import ElForm from 'element-ui/packages/form/src/form.vue'  /* 用于源码调试Element UI */
   import emitter from '@/utils/emitter'
   import './container-item/index'
   import FieldComponents from '@/components/form-designer/form-widget/field-widget/index'
   import {
-    generateId, deepClone, insertCustomCssToHead, insertGlobalFunctionsToHtml, getAllContainerWidgets,
-    getAllFieldWidgets, traverseFieldWidgets, buildDefaultFormJson
+    generateId,
+    deepClone,
+    insertCustomCssToHead,
+    insertGlobalFunctionsToHtml,
+    getAllContainerWidgets,
+    getAllFieldWidgets,
+    traverseFieldWidgets,
+    buildDefaultFormJson,
+    getDSByName,
+    runDataSourceRequest,
+    getFieldWidgetByName,
+    overwriteObj,
+    getContainerWidgetByName,
+    traverseFieldWidgetsOfContainer,
+    cloneFormConfigWithoutEventHandler
   } from "@/utils/util"
   import i18n, { changeLocale } from "@/utils/i18n"
+  import DynamicDialog from './dynamic-dialog'
+  import DynamicDrawer from './dynamic-drawer'
 
   export default {
     name: "VFormRender",
@@ -87,9 +103,29 @@
         type: Boolean,
         default: false
       },
+      disabledMode: { //表单禁止编辑模式
+        type: Boolean,
+        default: false,
+      },
+      renderConfig: { //渲染配置对象
+        type: Object,
+        default: () => {
+          return {
+            languageName: 'zh-CN',  //界面语言，默认显示中文
+          }
+        }
+      },
       globalDsv: { // 全局数据源变量
         type: Object,
         default: () => ({})
+      },
+      parentForm: {
+        type: Object,
+        default: null
+      },
+      dynamicCreation: { //是否弹窗、抽屉动态创建的VFormRender
+        type: Boolean,
+        default: false
       },
       customEvents: {
         type: Object,
@@ -108,6 +144,10 @@
           formModel: this.formDataModel,
         },
         previewState: this.previewState,
+        getReadMode: () => this.readModeFlag,
+        getSubFormFieldFlag: () => false,
+        getSubFormName: () => '',
+        getDSResultCache: () => this.dsResultCache,
       }
     },
     data() {
@@ -123,6 +163,11 @@
         formId: null,  //表单唯一Id，用于区分页面上的多个v-form-render组件！！
 
         externalComponents:  {},  //外部组件实例集合
+        readModeFlag: false,  //是否只读查看模式
+        dialogOrDrawerRef: null, //保存子级VFormRender的包裹弹窗组件或抽屉组件的ref
+        childFormRef: null, //保存子级VFormRender组件的ref
+
+        dsResultCache: {},  //数据源请求结果缓存
       }
     },
     computed: {
@@ -175,18 +220,25 @@
     },
     mounted() {
       this.initLocale()
+      this.initDataSetRequest()
       this.handleOnMounted()
     },
     methods: {
       initFormObject(insertHtmlCodeFlag = true) {
         this.formId = 'vfRender' + generateId()
-        if (!!insertHtmlCodeFlag) {
+        if (!!insertHtmlCodeFlag && !this.dynamicCreation) { // 弹窗、抽屉动态创建的VFormRender不重新插入全局CSS和全局函数节点！！
           this.insertCustomStyleAndScriptNode()
         }
         this.addFieldChangeEventHandler()
         this.addFieldValidateEventHandler()
         this.registerFormToRefList()
         this.handleOnCreated()
+
+        if (!!this.disabledMode) { //禁止表单编辑
+          this.$nextTick(() => {
+            this.disableForm()
+          })
+        }
       },
 
       getContainerWidgetName(widget) {
@@ -228,7 +280,9 @@
 
       buildDataFromWidget(wItem) {
         if (wItem.category === 'container') {
-          if (wItem.type === 'grid') {
+          if (wItem.type === 'vf-dialog' || wItem.type === 'vf-drawer') {
+            // 什么也不做，不处理弹窗、抽屉内部组件！！
+          } else if (wItem.type === 'grid') {
             if (!!wItem.cols && (wItem.cols.length > 0)) {
               wItem.cols.forEach((childItem) => {
                 this.buildDataFromWidget(childItem)
@@ -272,6 +326,28 @@
             } else {
               let initialValue = this.formData[subFormName]
               this.formDataModel[subFormName] = deepClone(initialValue)
+            }
+          } else if (wItem.type === 'grid-sub-form')  {
+            let gridSubFormName = wItem.options.name
+            if (!this.formData.hasOwnProperty(gridSubFormName)) {
+              let gsfFWList = []
+              let fieldListFn = (fw) => {
+                gsfFWList.push(fw)
+              }
+              traverseFieldWidgetsOfContainer(wItem, fieldListFn)
+
+              let gridSubFormDataRow = {}
+              if (wItem.options.showBlankRow) {
+                gsfFWList.forEach(gridSubFormItem => {
+                  gridSubFormDataRow[gridSubFormItem.options.name] = gridSubFormItem.options.defaultValue
+                })
+                this.formDataModel[gridSubFormName] = [gridSubFormDataRow]
+              } else {
+                this.formDataModel[gridSubFormName] = []
+              }
+            } else {
+              let initialValue = this.formData[gridSubFormName]
+              this.formDataModel[gridSubFormName] = deepClone(initialValue)
             }
           } else if ((wItem.type === 'grid-col') || (wItem.type === 'table-cell')) {
             if (!!wItem.widgetList && (wItem.widgetList.length > 0)) {
@@ -339,7 +415,7 @@
 
       findWidgetAndSetDisabled(widgetName, disabledFlag) {
         let foundW = this.getWidgetRef(widgetName)
-        if (!!foundW) {
+        if (!!foundW && !!foundW.setDisabled) {
           foundW.setDisabled(disabledFlag)
         } else { //没找到，可能是子表单中的组件
           this.findWidgetOfSubFormAndSetDisabled(widgetName, disabledFlag)
@@ -347,9 +423,14 @@
       },
 
       findWidgetOfSubFormAndSetDisabled(widgetName, disabledFlag) {
+        const widgetSchema = getFieldWidgetByName(this.formJsonObj.widgetList, widgetName, true)
+        if (!!widgetSchema && !!widgetSchema.options && widgetSchema.options.hasOwnProperty('disabled')) {
+          widgetSchema.options.disabled = disabledFlag
+        }
+
         this.findWidgetNameInSubForm(widgetName).forEach(wn => {
           let sw = this.getWidgetRef(wn)
-          if (!!sw) {
+          if (!!sw && !!sw.setDisabled) {
             sw.setDisabled(disabledFlag)
           }
         })
@@ -357,7 +438,7 @@
 
       findWidgetAndSetHidden(widgetName, hiddenFlag) {
         let foundW = this.getWidgetRef(widgetName)
-        if (!!foundW) {
+        if (!!foundW && !!foundW.setDisabled) {
           foundW.setHidden(hiddenFlag)
         } else { //没找到，可能是子表单中的组件
           this.findWidgetOfSubFormAndSetHidden(widgetName, hiddenFlag)
@@ -365,9 +446,14 @@
       },
 
       findWidgetOfSubFormAndSetHidden(widgetName, hiddenFlag) {
+        const widgetSchema = getFieldWidgetByName(this.formJsonObj.widgetList, widgetName, true)
+        if (!!widgetSchema && !!widgetSchema.options && widgetSchema.options.hasOwnProperty('hidden')) {
+          widgetSchema.options.hidden = hiddenFlag
+        }
+
         this.findWidgetNameInSubForm(widgetName).forEach(wn => {
           let sw = this.getWidgetRef(wn)
-          if (!!sw) {
+          if (!!sw && !!sw.setDisabled) {
             sw.setHidden(hiddenFlag)
           }
         })
@@ -398,11 +484,42 @@
         return result
       },
 
+      initDataSetRequest() {
+        let dsNameSet = new Set()
+        this.getFieldWidgets().forEach(fw => {
+          if (!!fw.field.options.dsEnabled && !!fw.field.options.dsName && !!fw.field.options.dataSetName) {
+            dsNameSet.add(fw.field.options.dsName)
+          }
+        })
+
+        if (dsNameSet.size > 0) {
+          dsNameSet.forEach(async (dsName) => {
+            let curDS = getDSByName(this.formConfig, dsName)
+            if (!!curDS) {
+              let localDsv = new Object({})
+              overwriteObj(localDsv, this.globalDsv || {})
+              let dsResult = null
+              try {
+                dsResult = await runDataSourceRequest(curDS, localDsv, this, false, this.$message)
+                this.dsResultCache[dsName] = dsResult
+                this.broadcast('FieldWidget', 'loadOptionItemsFromDataSet', dsName)  //注意：跟Vue2不同，事件参数不需要包含在数组中传递！！
+              } catch (err) {
+                this.$message.error(err.message)
+              }
+            }
+          })
+        }
+      },
+
       //--------------------- 以下为组件支持外部调用的API方法 begin ------------------//
       /* 提示：用户可自行扩充这些方法！！！ */
 
       changeLanguage(langName) {
         changeLocale(langName)
+      },
+
+      getLanguageName() {
+        return localStorage.getItem('v_form_locale') || 'en-US'
       },
 
       getNativeForm() { //获取原生form引用
@@ -457,6 +574,7 @@
             this.insertCustomStyleAndScriptNode()  /* 必须先插入表单全局函数，否则VForm内部引用全局函数会报错！！！ */
             this.$nextTick(() => {
               this.initFormObject(false)
+              this.initDataSetRequest()
               this.handleOnMounted()
             })
           } else {
@@ -565,6 +683,8 @@
           if (!!foundW) {
             if (!!foundW.widget && (foundW.widget.type === 'sub-form')) {
               foundW.disableSubForm()
+            } else if (!!foundW.widget && (foundW.widget.type === 'grid-sub-form')) {
+              foundW.disableGridSubForm()
             } else {
               //!!foundW.setDisabled && foundW.setDisabled(true)
               if (!!foundW.setDisabled) {
@@ -582,6 +702,8 @@
           if (!!foundW) {
             if (!!foundW.widget && (foundW.widget.type === 'sub-form')) {
               foundW.enableSubForm()
+            } else if (!!foundW.widget && (foundW.widget.type === 'grid-sub-form')) {
+              foundW.enableGridSubForm()
             } else {
               //!!foundW.setDisabled && foundW.setDisabled(false)
               if (!!foundW.setDisabled) {
@@ -681,10 +803,11 @@
 
       /**
        * 获取所有字段组件
+       * @param staticWidgetsIncluded 是否包含按钮等静态组件，默认不包含
        * @returns {*[]}
        */
-      getFieldWidgets() {
-        return getAllFieldWidgets(this.formJsonObj.widgetList)
+      getFieldWidgets(staticWidgetsIncluded = false) {
+        return getAllFieldWidgets(this.formJsonObj.widgetList, staticWidgetsIncluded)
       },
 
       /**
@@ -723,11 +846,156 @@
       },
 
       /**
+       * 设置或取消设置表单为只读查看模式
+       * @param readonlyFlag
+       */
+      setReadMode(readonlyFlag = true) {
+        this.readModeFlag = readonlyFlag
+      },
+
+      /**
+       * 获取表单当前是否只读查看模式
+       * @returns {boolean}
+       */
+      getReadMode() {
+        return this.readModeFlag
+      },
+
+      /**
        * 获取globalDsv对象
        * @returns {*}
        */
       getGlobalDsv() {
         return this.globalDsv
+      },
+
+      /**
+       * 执行数据源请求
+       * @param dsName
+       * @param localDsv
+       */
+      async executeDataSource(dsName, localDsv) {
+        let ds = getDSByName(this.formJsonObj.formConfig, dsName)
+        let newDsv = new Object({})
+        overwriteObj(newDsv, this.globalDsv)
+        overwriteObj(newDsv, localDsv)
+        return await runDataSourceRequest(ds, newDsv, this, false, this.$message)
+      },
+
+      /**
+       * 获取父级VFormRender组件实例
+       * @returns {object}
+       */
+      getParentFormRef() {
+        return this.parentForm
+      },
+
+      setChildFormRef(childFormRef) {
+        this.childFormRef = childFormRef
+      },
+
+      getChildFormRef() {
+        return this.childFormRef
+      },
+
+      /**
+       * 是否弹窗、抽屉组件动态创建的v-form-render
+       * @returns {boolean}
+       */
+      isDynamicCreation() {
+        return this.dynamicCreation
+      },
+
+      setDialogOrDrawerRef(ddRef) {
+        this.dialogOrDrawerRef = ddRef
+      },
+
+      /**
+       * 获取子级VFormRender的包裹弹窗组件或抽屉组件实例ref
+       * @returns {object}
+       */
+      getDialogOrDrawerRef() {
+        return this.dialogOrDrawerRef
+      },
+
+      /**
+       * 显示弹窗表单，动态创建v-form-render组件，option-data、global-dsv等属性继承父级表单
+       * @param dialogName
+       * @param formData
+       * @param extraData
+       */
+      showDialog(dialogName, formData = {}, extraData = {}) {
+        let dialogCon = getContainerWidgetByName(this.widgetList, dialogName)
+        if (!dialogName || (dialogCon.type !== 'vf-dialog')) {
+          this.$message.error(this.i18nt('render.hint.refNotFound') + dialogName)
+          return
+        }
+        let dFormJson = {
+          widgetList: deepClone(dialogCon.widgetList),
+          formConfig: cloneFormConfigWithoutEventHandler(this.formConfig)
+        }
+
+        let dialogInstance = createVNode(DynamicDialog, {
+          options: dialogCon.options,
+          formJson: dFormJson,
+          formData: formData || {},
+          optionData: this.optionData,
+          globalDsv: this.globalDsv,
+          parentFormRef: this,
+          extraData: extraData,
+        })
+        dialogInstance.appContext = this.$root.$.appContext  //非常重要， 覆盖应用上下文！！
+
+        let wrapperDiv = document.getElementById('vf-dynamic-dialog-wrapper')
+        if (!wrapperDiv) {
+          wrapperDiv = document.createElement("div")
+          wrapperDiv.id = 'vf-dynamic-dialog-wrapper'
+          document.body.appendChild(wrapperDiv)
+        }
+        render(dialogInstance, wrapperDiv)
+        document.body.appendChild( dialogInstance.el )
+        dialogInstance.component.ctx.show()
+      },
+
+      showDrawer(drawerName, formData = {}, extraData = {}) {
+        let drawerCon = getContainerWidgetByName(this.widgetList, drawerName)
+        if (!drawerCon || (drawerCon.type !== 'vf-drawer')) {
+          this.$message.error(this.i18nt('render.hint.refNotFound') + drawerName)
+          return
+        }
+        let dFormJson = {
+          widgetList: deepClone(drawerCon.widgetList),
+          formConfig: cloneFormConfigWithoutEventHandler(this.formConfig)
+        }
+
+        let drawerInstance = createVNode(DynamicDrawer, {
+          options: drawerCon.options,
+          formJson: dFormJson,
+          formData: formData || {},
+          optionData: this.optionData,
+          globalDsv: this.globalDsv,
+          parentFormRef: this,
+          extraData: extraData,
+        })
+        drawerInstance.appContext = this.$root.$.appContext  //非常重要， 覆盖应用上下文！！
+
+        let wrapperDiv = document.getElementById('vf-dynamic-drawer-wrapper')
+        if (!wrapperDiv) {
+          wrapperDiv = document.createElement("div")
+          wrapperDiv.id = 'vf-dynamic-drawer-wrapper'
+          document.body.appendChild(wrapperDiv)
+        }
+        render(drawerInstance, wrapperDiv)
+        document.body.appendChild( drawerInstance.el )
+        drawerInstance.component.ctx.show()
+      },
+
+      /**
+       * 判断表单是否处于设计器预览状态
+       * @return {boolean}
+       */
+      isPreviewState() {
+        return this.previewState
       },
 
       //--------------------- 以上为组件支持外部调用的API方法 end ------------------//

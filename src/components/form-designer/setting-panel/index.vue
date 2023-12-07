@@ -59,7 +59,8 @@
                 <el-collapse-item name="3" v-if="showEventCollapse() && showCollapse(eventProps)" :title="i18nt('designer.setting.eventSetting')">
                   <template v-for="(editorName, propName) in eventProps">
                     <component v-if="hasPropEditor(propName, editorName)" :is="getPropEditor(propName, editorName)"
-                               :designer="designer" :selected-widget="selectedWidget" :option-model="optionModel"></component>
+                               :designer="designer" :selected-widget="selectedWidget" :option-model="optionModel"
+                               :event-handled="getEventHandled(propName)"></component>
                   </template>
                 </el-collapse-item>
               </el-collapse>
@@ -72,6 +73,13 @@
       <el-tab-pane v-if="!!designer" :label="i18nt('designer.hint.formSetting')" name="2">
         <el-scrollbar class="setting-scrollbar" :style="{height: scrollerHeight}">
           <form-setting :designer="designer" :form-config="formConfig"></form-setting>
+        </el-scrollbar>
+      </el-tab-pane>
+
+      <el-tab-pane :label="i18nt('designer.setting.dataSource')" name="3">
+        <el-scrollbar class="ds-setting-scrollbar" :style="{height: scrollerHeight}">
+          <data-source-setting :designer="designer" :form-config="formConfig">
+          </data-source-setting>
         </el-scrollbar>
       </el-tab-pane>
     </el-tabs>
@@ -101,6 +109,7 @@
   import CodeEditor from '@/components/code-editor/index'
   import PropertyEditors from './property-editor/index'
   import FormSetting from './form-setting'
+  import DataSourceSetting from './data-source-setting'
   import WidgetProperties from './propertyRegister'
   import {
     addWindowResizeHandler,
@@ -119,6 +128,7 @@
     components: {
       CodeEditor,
       FormSetting,
+      DataSourceSetting,
       ...PropertyEditors,
     },
     props: {
@@ -132,6 +142,12 @@
       customEvents: {
         type: Object,
         default: () => ({})
+      },
+      provide() {
+        return {
+          isSubFormChildWidget: () => this.subFormChildWidgetFlag,
+          getGlobalDsv: () => this.globalDsv, // 全局数据源变量
+        }
       },
     },
     inject: ['getDesignerConfig'],
@@ -205,6 +221,11 @@
       this.designer.handleEvent('form-css-updated', (cssClassList) => {
         this.designer.setCssClassList(cssClassList)
       })
+
+      //监听字段组件选中事件
+      this.designer.handleEvent('field-selected', (parentWidget) => {
+        this.subFormChildWidgetFlag = !!parentWidget && (parentWidget.type === 'sub-form');
+      })
     },
     mounted() {
       if (!this.designer.selectedWidget) {
@@ -222,6 +243,10 @@
       })
     },
     methods: {
+      getEventHandled(eventName) {
+        return !!this.optionModel[eventName] && (this.optionModel[eventName].length > 0)
+      },
+
       showEventCollapse() {
         if (this.designerConfig['eventCollapse'] === undefined) {
           return true
@@ -326,6 +351,13 @@
     }
   }
 
+  .ds-setting-scrollbar {
+    /*width: 284px;*/
+    :deep(.el-scrollbar__wrap) {
+      overflow-x: hidden; /* IE浏览器隐藏水平滚动条箭头！！ */
+    }
+  }
+
   .setting-collapse {
     :deep(.el-collapse-item__content) {
       padding-bottom: 6px;
@@ -373,6 +405,26 @@
     :deep(.el-dialog__body) {
       padding: 6px 15px 12px 15px;
     }
+  }
+
+  :deep(.header-small-mb .el-drawer__header) {
+    margin-bottom: 6px;
+  }
+
+  :deep(.header-small-mb .el-drawer__body) {
+    padding: 12px;
+  }
+
+  :deep(.el-button.button-text-highlight) {
+    font-weight: bold;
+    color: $--color-primary;
+  }
+
+</style>
+
+<style lang="scss">
+  .ds-setting-drawer {
+    right: 320px !important;
   }
 
 </style>

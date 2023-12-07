@@ -26,7 +26,13 @@ export default {
     onRemoteChange(val) {
       if (!!val) {
         this.optionModel.filterable = true
-        this.optionModel.allowCreate = false
+        //this.optionModel.allowCreate = false
+      }
+    },
+
+    onAllowCreateChange(val) {
+      if (!!val) {
+        this.optionModel.filterable = true
       }
     },
 
