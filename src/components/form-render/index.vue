@@ -11,7 +11,7 @@
 <template>
   <el-form :label-position="labelPosition" :size="size" :class="[customClass, readModeFlag ? 'readonly-mode-form' : '']" class="render-form"
            :label-width="labelWidth" :validate-on-rule-change="false"
-           :model="formDataModel" ref="renderForm"
+           :model="formDataModel" ref="renderForm" v-bind="formProps"
            @submit.prevent>
     <template v-for="(widget, index) in widgetList">
       <template v-if="'container' === widget.category">
@@ -168,6 +168,7 @@
         childFormRef: null, //保存子级VFormRender组件的ref
 
         dsResultCache: {},  //数据源请求结果缓存
+        formProps: {}
       }
     },
     computed: {
