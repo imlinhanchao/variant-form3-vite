@@ -131,6 +131,14 @@
         type: Object,
         default: () => ({})
       },
+      formProps: {
+        type: Object,
+        default: () => ({})
+      },
+      formEventSwitch: {
+        type: Boolean,
+        default: true
+      }
     },
     provide() {
       return {
@@ -168,7 +176,6 @@
         childFormRef: null, //保存子级VFormRender组件的ref
 
         dsResultCache: {},  //数据源请求结果缓存
-        formProps: {}
       }
     },
     computed: {
@@ -393,7 +400,7 @@
       },
 
       handleFieldDataChange(fieldName, newValue, oldValue, subFormName, subFormRowIndex) {
-        if (!!this.formConfig && !!this.formConfig.onFormDataChange) {
+        if (!!this.formConfig && !!this.formConfig.onFormDataChange && this.formEventSwitch) {
           let customFunc = new Function('fieldName', 'newValue', 'oldValue', 'formModel', 'subFormName', 'subFormRowIndex',
               this.formConfig.onFormDataChange)
           customFunc.call(this, fieldName, newValue, oldValue, this.formDataModel, subFormName, subFormRowIndex)
@@ -401,14 +408,14 @@
       },
 
       handleOnCreated() {
-        if (!!this.formConfig && !!this.formConfig.onFormCreated) {
+        if (!!this.formConfig && !!this.formConfig.onFormCreated && this.formEventSwitch) {
           let customFunc = new Function(this.formConfig.onFormCreated)
           customFunc.call(this)
         }
       },
 
       handleOnMounted() {
-        if (!!this.formConfig && !!this.formConfig.onFormMounted) {
+        if (!!this.formConfig && !!this.formConfig.onFormMounted && this.formEventSwitch) {
           let customFunc = new Function(this.formConfig.onFormMounted)
           customFunc.call(this)
         }
