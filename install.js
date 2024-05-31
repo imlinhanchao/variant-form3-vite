@@ -12,7 +12,7 @@ import ContainerWidgets from '@/components/form-designer/form-widget/container-w
 import ContainerItems from '@/components/form-render/container-item/index'
 
 import { addDirective } from '@/utils/directive'
-import { installI18n } from '@/utils/i18n'
+import { installI18n, changeLocale } from '@/utils/i18n'
 import { loadExtension } from '@/extension/extension-loader'
 
 
@@ -68,6 +68,7 @@ if (typeof window !== 'undefined' && window.Vue) { /* script方式引入时赋�
 
 export default {
   install,
+  setLocale: changeLocale,
   VFormDesigner,
   VFormRender
 }
