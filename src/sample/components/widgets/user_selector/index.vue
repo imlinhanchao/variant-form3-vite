@@ -1,4 +1,4 @@
-<script setup lang="ts" name="userSelector">
+<script setup lang="ts" name="user_selector">
   import { defineProps, defineEmits, defineExpose, ref, watch, onMounted, computed } from 'vue';
 
   const props = withDefaults(

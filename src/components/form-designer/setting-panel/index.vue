@@ -16,8 +16,8 @@
                 </el-collapse-item>
 
                 <el-collapse-item name="2" v-if="showCollapse(advProps)" :title="i18nt('designer.setting.advancedSetting')">
-                  <template v-for="editorName in customProps">
-                    <slot :name="editorName" :designer="designer" :selected-widget="selectedWidget" :option-model="optionModel" />
+                  <template v-for="(editorName, propName) in customProps" >
+                    <slot v-if="Object.keys(selectedWidget?.options).includes(propName)" :name="editorName" :designer="designer" :selected-widget="selectedWidget" :option-model="optionModel" />
                   </template>
                   <template v-for="(editorName, propName) in advProps">
                     <component v-if="hasPropEditor(propName, editorName)" :is="getPropEditor(propName, editorName)"
