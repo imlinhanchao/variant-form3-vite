@@ -37,7 +37,16 @@
     inject: ['serverFieldList', 'getDesignerConfig'],
     data() {
       return {
-        nameRequiredRule: [{required: true, message: 'name required'}],
+        nameRequiredRule: [
+          {
+            required: true, message: '必须填写唯一名称'
+          },
+          {
+            pattern: /^[a-z][a-z0-9_]*$/,
+            message: '只能包含小写字母、数字和下划线',
+            trigger: 'change'
+          }
+        ],
       }
     },
     computed: {
@@ -91,5 +100,7 @@
 </script>
 
 <style lang="scss" scoped>
-
+.el-form-item--small.el-form-item {
+  margin-bottom: 18px!important;
+}
 </style>
