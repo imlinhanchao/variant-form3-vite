@@ -176,7 +176,7 @@ export default {
       advancedSetting: '高级属性',
       eventSetting: '事件属性',
       uniqueName: '唯一名称',
-      editNameHelp: '修改名称后需按回车确认',
+      editNameHelp: '修改名称后需按回车确认，只能填写小写字母、数字和下划线',
       label: '标签',
       displayType: '显示类型',
       defaultValue: '默认值',

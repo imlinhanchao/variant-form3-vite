@@ -43,7 +43,7 @@
           },
           {
             pattern: /^[a-z][a-z0-9_]*$/,
-            message: '只能包含小写字母、数字和下划线',
+            message: '只能小写字母、数字和下划线',
             trigger: 'change'
           }
         ],
