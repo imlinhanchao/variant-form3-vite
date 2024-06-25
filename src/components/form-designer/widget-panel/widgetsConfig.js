@@ -1057,7 +1057,11 @@ export const advancedFields = [
       //-------------------
       onCreated: '',
       onMounted: '',
-      onBeforeUpload: '',
+      onBeforeUpload: `this.getGlobalDsv().uploadFile(file, (data) => {
+  if (!this.fieldModel) this.fieldModel = [];
+  this.handlePictureUpload(data, { status: 'success' }, this.fileList.concat([data]))
+}, this);
+return false;`,
       onUploadSuccess: '',
       onUploadError: '',
       onFileRemove: '',
@@ -1102,7 +1106,11 @@ export const advancedFields = [
       //-------------------
       onCreated: '',
       onMounted: '',
-      onBeforeUpload: '',
+      onBeforeUpload: `this.getGlobalDsv().uploadFile(file, (data) => {
+  if (!this.fieldModel) this.fieldModel = [];
+  this.handleFileUpload(data, { status: 'success' }, this.fileList.concat([data]))
+}, this);
+return false;`,
       onUploadSuccess: '',
       onUploadError: '',
       onFileRemove: '',
