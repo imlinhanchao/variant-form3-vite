@@ -141,8 +141,8 @@
       addOption() {
         let newValue = this.optionModel.optionItems.length + 1
         this.optionModel.optionItems.push({
-          value: newValue,
-          label: 'new option'
+          value: 'option ' + newValue,
+          label: 'option ' + newValue
         })
       },
 
