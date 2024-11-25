@@ -67,6 +67,10 @@
         type: String,
         default: ''
       },
+      i18n: {
+        type: String,
+        default: 'zh-cn',
+      },
     },
     computed: {
       selected() {

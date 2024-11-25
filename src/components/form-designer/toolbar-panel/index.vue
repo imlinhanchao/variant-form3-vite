@@ -53,8 +53,8 @@
                          @appendButtonClick="testOnAppendButtonClick" @buttonClick="testOnButtonClick"
                          @dataTableSelectionChange="testDTSC" @operationButtonClick="testOBC"
                          @myEmitTest="onMyEmitTest"
-                         @formChange="handleFormChange">
-              <template v-for="slotName in Object.keys($slots).filter(s => s.endsWith('-widget'))" #[slotName]="scope">
+                         @formChange="handleFormChange" :i18n="i18n">
+              <template v-for="slotName in Object.keys($slots).filter(s => s.endsWith('-widget'))" :key="slotName" #[slotName]="scope">
                 <slot :name="slotName" v-bind="scope"></slot>
               </template>
             </VFormRender>
@@ -72,6 +72,7 @@
             <el-button v-if="false" @click="testSetFormJson">Test SFJ</el-button>
             <el-button v-if="false" @click="testSetFormData">Test SFD</el-button>
             <el-button v-if="false" @click="testReloadOptionData">Test ROD</el-button>
+            <span style="margin-left: 10px"><slot name="customPreviewButtons" :i18n="i18n" :changeI18n="changeI18n"></slot></span>
           </div>
         </template>
       </el-dialog>
@@ -282,7 +283,7 @@
             {label: '丑橘子', value: 3},
           ],
         },
-
+        i18n: 'zh-cn',
       }
     },
     computed: {
@@ -336,6 +337,9 @@
       })
     },
     methods: {
+      changeI18n(lang) {
+        this.i18n = lang
+      },
       showToolButton(configName) {
         if (this.designerConfig[configName] === undefined) {
           return true

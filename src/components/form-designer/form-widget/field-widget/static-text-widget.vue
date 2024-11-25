@@ -1,9 +1,9 @@
 <template>
-  <static-content-wrapper :designer="designer" :field="field" :design-state="designState"
+  <static-content-wrapper :designer="designer" :field="field" :design-state="designState" :i18n="i18n"
                           :parent-widget="parentWidget" :parent-list="parentList" :index-of-parent-list="indexOfParentList"
                           :sub-form-row-index="subFormRowIndex" :sub-form-col-index="subFormColIndex" :sub-form-row-id="subFormRowId">
     <div ref="fieldEditor" :style="!!field.options.fontSize ? `font-size: ${field.options.fontSize};`: ''">
-      <span :style="{'white-space': !!field.options.preWrap ? 'pre-wrap' : 'pre', 'text-align': !!field.options.textAlign ? field.options.textAlign : 'left'}">{{field.options.textContent}}</span></div>
+      <span :style="{'white-space': !!field.options.preWrap ? 'pre-wrap' : 'pre', 'text-align': !!field.options.textAlign ? field.options.textAlign : 'left'}">{{textContent}}</span></div>
   </static-content-wrapper>
 </template>
 
@@ -41,13 +41,22 @@
         type: String,
         default: ''
       },
+      i18n: {
+        type: String,
+        default: 'zh-cn',
+      },
 
     },
     components: {
       StaticContentWrapper,
     },
     computed: {
-
+      textContent() {
+        if (this.i18n != 'zh-cn') {
+          return this.field.options.textContentI18n?.[this.i18n] || this.field.options.textContent
+        }
+        return this.field.options.textContent
+      }
     },
     beforeCreate() {
       /* 这里不能访问方法和属性！！ */

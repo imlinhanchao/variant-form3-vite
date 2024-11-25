@@ -3,7 +3,7 @@
   "version": "3.0.24",
   "private": false,
   "scripts": {
-    "serve": "vite --host",
+    "dev": "vite --host",
     "prepublish": "npm run lib && npm run lib-render && node build/build.js",
     "build": "vite build",
     "lib": "vite build --config build/vite-lib.config.js",

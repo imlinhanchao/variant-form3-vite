@@ -364,6 +364,7 @@ export const basicFields = [
     options: {
       name: '',
       label: '',
+      labelI18n: {},
       labelAlign: '',
       type: 'text',
       defaultValue: '',
@@ -413,6 +414,7 @@ export const basicFields = [
     options: {
       name: '',
       label: '',
+      labelI18n: {},
       labelAlign: '',
       rows: 3,
       defaultValue: '',
@@ -454,6 +456,7 @@ export const basicFields = [
     options: {
       name: '',
       label: '',
+      labelI18n: {},
       labelAlign: '',
       defaultValue: 0,
       placeholder: '',
@@ -494,6 +497,7 @@ export const basicFields = [
     options: {
       name: '',
       label: '',
+      labelI18n: {},
       labelAlign: '',
       defaultValue: null,
       columnWidth: '200px',
@@ -511,9 +515,9 @@ export const basicFields = [
       labelKey: 'label',
       valueKey: 'value',
       optionItems: [
-        {label: 'radio 1', value: 'radio 1'},
-        {label: 'radio 2', value: 'radio 2'},
-        {label: 'radio 3', value: 'radio 3'},
+        {label: 'radio 1', value: 'radio 1', i18n: {}},
+        {label: 'radio 2', value: 'radio 2', i18n: {}},
+        {label: 'radio 3', value: 'radio 3', i18n: {}},
       ],
       required: false,
       requiredHint: '',
@@ -539,6 +543,7 @@ export const basicFields = [
     options: {
       name: '',
       label: '',
+      labelI18n: {},
       labelAlign: '',
       defaultValue: [],
       columnWidth: '200px',
@@ -556,9 +561,9 @@ export const basicFields = [
       labelKey: 'label',
       valueKey: 'value',
       optionItems: [
-        {label: 'check 1', value: 'check 1'},
-        {label: 'check 2', value: 'check 2'},
-        {label: 'check 3', value: 'check 3'},
+        {label: 'check 1', value: 'check 1', i18n: {}},
+        {label: 'check 2', value: 'check 2', i18n: {}},
+        {label: 'check 3', value: 'check 3', i18n: {}},
       ],
       required: false,
       requiredHint: '',
@@ -584,6 +589,7 @@ export const basicFields = [
     options: {
       name: '',
       label: '',
+      labelI18n: {},
       labelAlign: '',
       defaultValue: '',
       placeholder: '',
@@ -606,9 +612,9 @@ export const basicFields = [
       labelKey: 'label',
       valueKey: 'value',
       optionItems: [
-        {label: 'select 1', value: 'select 1'},
-        {label: 'select 2', value: 'select 2'},
-        {label: 'select 3', value: 'select 3'},
+        {label: 'select 1', value: 'select 1', i18n: {}},
+        {label: 'select 2', value: 'select 2', i18n: {}},
+        {label: 'select 3', value: 'select 3', i18n: {}},
       ],
       required: false,
       requiredHint: '',
@@ -637,6 +643,7 @@ export const basicFields = [
     options: {
       name: '',
       label: '',
+      labelI18n: {},
       labelAlign: '',
       defaultValue: null,
       placeholder: '',
@@ -677,6 +684,7 @@ export const basicFields = [
     options: {
       name: '',
       label: '',
+      labelI18n: {},
       labelAlign: '',
       defaultValue: null,
       startPlaceholder: '',
@@ -718,6 +726,7 @@ export const basicFields = [
     options: {
       name: '',
       label: '',
+      labelI18n: {},
       labelAlign: '',
       type: 'date',
       defaultValue: null,
@@ -760,6 +769,7 @@ export const basicFields = [
     options: {
       name: '',
       label: '',
+      labelI18n: {},
       labelAlign: '',
       type: 'daterange',
       defaultValue: null,
@@ -803,6 +813,7 @@ export const basicFields = [
     options: {
       name: '',
       label: '',
+      labelI18n: {},
       labelAlign: '',
       defaultValue: null,
       columnWidth: '200px',
@@ -835,6 +846,7 @@ export const basicFields = [
     options: {
       name: '',
       label: '',
+      labelI18n: {},
       labelAlign: '',
       defaultValue: null,
       columnWidth: '200px',
@@ -872,6 +884,7 @@ export const basicFields = [
     options: {
       name: '',
       label: '',
+      labelI18n: {},
       labelAlign: '',
       defaultValue: null,
       columnWidth: '200px',
@@ -904,6 +917,7 @@ export const basicFields = [
     options: {
       name: '',
       label: '',
+      labelI18n: {},
       labelAlign: '',
       columnWidth: '200px',
       showStops: true,
@@ -944,6 +958,7 @@ export const basicFields = [
       columnWidth: '200px',
       hidden: false,
       textContent: 'static text',
+      textContentI18n: {},
       textAlign: 'left',
       fontSize: '13px',
       preWrap: true,  //是否自动换行
@@ -964,6 +979,7 @@ export const basicFields = [
       columnWidth: '200px',
       hidden: false,
       htmlContent: '<b>html text</b>',
+      textContentI18n: {},
       //-------------------
       customClass: '',  //自定义css类名
       //-------------------
@@ -1005,6 +1021,7 @@ export const basicFields = [
     options: {
       name: '',
       label: '',
+      labelI18n: {},
       columnWidth: '200px',
       direction: 'horizontal',
       contentPosition: 'center',
@@ -1029,6 +1046,7 @@ export const advancedFields = [
     options: {
       name: '',
       label: '',
+      labelI18n: {},
       labelAlign: '',
       labelWidth: null,
       labelHidden: false,
@@ -1078,6 +1096,7 @@ return false;`,
     options: {
       name: '',
       label: '',
+      labelI18n: {},
       labelAlign: '',
       labelWidth: null,
       labelHidden: false,
@@ -1126,6 +1145,7 @@ return false;`,
     options: {
       name: '',
       label: '',
+      labelI18n: {},
       labelAlign: '',
       placeholder: '',
       labelWidth: null,
@@ -1160,6 +1180,7 @@ return false;`,
     options: {
       name: '',
       label: '',
+      labelI18n: {},
       labelAlign: '',
       defaultValue: '',
       placeholder: '',
@@ -1181,9 +1202,9 @@ return false;`,
       valueKey: 'value',
       childrenKey: 'children',
       optionItems: [
-        {label: 'select 1', value: 1, children: [{label: 'child 1', value: 11}]},
-        {label: 'select 2', value: 2},
-        {label: 'select 3', value: 3},
+        {label: 'select 1', value: 1, i18n: {}, children: [{label: 'child 1', value: 11, i18n: {}}]},
+        {label: 'select 2', value: 2, i18n: {}},
+        {label: 'select 3', value: 3, i18n: {}},
       ],
       required: false,
       requiredHint: '',

@@ -8,7 +8,13 @@
           <li>
             <el-radio :label="option.value">
               <el-input v-model="option.value" size="small" style="width: 100px"></el-input>
-              <el-input v-model="option.label" size="small" style="width: 100px"></el-input>
+              <el-input v-model="option.label" size="small" style="width: 100px">
+                <template #suffix>
+                  <el-button link @click="$refs.i18nRef?.open(option.labelI18n || {}, option.label).then((val) => option.labelI18n = val)">
+                    <svg-icon icon-class="byd-international" />
+                  </el-button>
+                </template>
+              </el-input>
               <i class="iconfont icon-drag drag-option"></i>
               <el-button circle plain size="small" type="danger" @click="deleteOption(option, idx)"
                          icon="el-icon-minus" class="col-delete-button"></el-button>
@@ -25,7 +31,13 @@
           <li>
             <el-checkbox :label="option.value">
               <el-input v-model="option.value" size="small" style="width: 100px"></el-input>
-              <el-input v-model="option.label" size="small" style="width: 100px"></el-input>
+              <el-input v-model="option.label" size="small" style="width: 100px">
+                <template #suffix>
+                  <el-button link @click="$refs.i18nRef?.open(option.labelI18n || {}, option.label).then((val) => option.labelI18n = val)">
+                    <svg-icon icon-class="byd-international" />
+                  </el-button>
+                </template>
+              </el-input>
               <i class="iconfont icon-drag drag-option"></i>
               <el-button circle plain size="small" type="danger" @click="deleteOption(option, idx)"
                          icon="el-icon-minus" class="col-delete-button"></el-button>
@@ -80,19 +92,23 @@
         </template>
       </el-dialog>
     </div>
-
+    <i18n-dlg ref="i18nRef"></i18n-dlg>
   </div>
 </template>
 
 <script>
   import CodeEditor from '@/components/code-editor/index'
   import i18n from "@/utils/i18n";
+  import i18nDlg from "@/components/form-designer/setting-panel/i18nDlg"
+  import SvgIcon from '@/components/svg-icon'
 
   export default {
     name: "OptionItemsSetting",
     mixins: [i18n],
     components: {
       CodeEditor,
+      i18nDlg,
+      SvgIcon,
     },
     props: {
       designer: Object,

@@ -91,6 +91,8 @@
       return designerRef.value?.getFormJson();
     },
   });
+
+  const i18n = ref('zh-cn');
 </script>
 
 <template>
@@ -107,9 +109,22 @@
           }"
           :custom-widgets="customWidgets"
           :custom-events="customEvents"
+          :i18n="i18n"
         >
           <template v-for="(component, name) in CustomComponents" #[name]="scoped" :key="name">
             <component :is="(component as any).default" v-bind="scoped" />
+          </template>
+          <template #customToolButtons>
+            <el-select v-model="i18n" style="width: 80px">
+              <el-option label="中文" value="zh-cn"></el-option>
+              <el-option label="English" value="en"></el-option>
+            </el-select>
+          </template>          
+          <template #customPreviewButtons="{ i18n, changeI18n }">
+            <el-select :model-value="i18n" @update:model-value="changeI18n" style="width: 100px">
+              <el-option label="中文" value="zh-cn"></el-option>
+              <el-option label="English" value="en"></el-option>
+            </el-select>
           </template>
         </v-form-designer>
       </section>

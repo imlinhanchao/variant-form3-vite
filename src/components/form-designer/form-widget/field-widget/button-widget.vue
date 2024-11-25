@@ -8,7 +8,7 @@
                :circle="field.options.circle" :icon="field.options.icon"
                :disabled="field.options.disabled"
                @click="handleButtonWidgetClick">
-      {{field.options.label}}</el-button>
+      {{label}}</el-button>
   </static-content-wrapper>
 </template>
 
@@ -46,13 +46,22 @@
         type: String,
         default: ''
       },
+      i18n: {
+        type: String,
+        default: 'zh-cn',
+      },
 
     },
     components: {
       StaticContentWrapper,
     },
     computed: {
-
+      label() {
+        if (this.i18n != 'zh-cn') {
+          return this.field.options.labelI18n?.[this.i18n] || this.field.options.label
+        }
+        return this.field.options.label
+      }
     },
     beforeCreate() {
       /* 这里不能访问方法和属性！！ */

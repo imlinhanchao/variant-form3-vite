@@ -3,7 +3,7 @@
                           :parent-widget="parentWidget" :parent-list="parentList" :index-of-parent-list="indexOfParentList"
                           :sub-form-row-index="subFormRowIndex" :sub-form-col-index="subFormColIndex" :sub-form-row-id="subFormRowId">
     <el-divider ref="fieldEditor" :direction="field.options.direction" :content-position="field.options.contentPosition">
-      {{field.options.label}}</el-divider>
+      {{label}}</el-divider>
   </static-content-wrapper>
 </template>
 
@@ -41,13 +41,22 @@
         type: String,
         default: ''
       },
+      i18n: {
+        type: String,
+        default: 'zh-cn',
+      },
 
     },
     components: {
       StaticContentWrapper,
     },
     computed: {
-
+      label() {
+        if (this.i18n != 'zh-cn') {
+          return this.field.options.labelI18n?.[this.i18n] || this.field.options.label
+        }
+        return this.field.options.label
+      }
     },
     beforeCreate() {
       /* 这里不能访问方法和属性！！ */

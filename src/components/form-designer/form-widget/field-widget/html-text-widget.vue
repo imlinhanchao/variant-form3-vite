@@ -2,7 +2,7 @@
   <static-content-wrapper :designer="designer" :field="field" :design-state="designState"
                           :parent-widget="parentWidget" :parent-list="parentList" :index-of-parent-list="indexOfParentList"
                           :sub-form-row-index="subFormRowIndex" :sub-form-col-index="subFormColIndex" :sub-form-row-id="subFormRowId">
-    <div ref="fieldEditor" v-html="field.options.htmlContent"></div>
+    <div ref="fieldEditor" v-html="htmlContent"></div>
   </static-content-wrapper>
 </template>
 
@@ -40,13 +40,22 @@
         type: String,
         default: ''
       },
+      i18n: {
+        type: String,
+        default: 'zh-cn',
+      },
 
     },
     components: {
       StaticContentWrapper,
     },
     computed: {
-
+      htmlContent() {
+        if (this.i18n != 'zh-cn') {
+          return this.field.options.htmlContentI18n?.[this.i18n] || this.field.options.htmlContent
+        }
+        return this.field.options.htmlContent
+      }
     },
     beforeCreate() {
       /* 这里不能访问方法和属性！！ */

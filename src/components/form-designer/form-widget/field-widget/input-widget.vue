@@ -60,7 +60,6 @@
         type: String,
         default: ''
       },
-
     },
     components: {
       FormItemWrapper,

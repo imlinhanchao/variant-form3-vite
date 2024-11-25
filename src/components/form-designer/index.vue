@@ -22,6 +22,9 @@
             <template #customToolButtons>
               <slot name="customToolButtons" :designer="designer" :global-dsv="globalDsv"></slot>
             </template>
+            <template #customPreviewButtons="{ i18n, changeI18n }">
+              <slot name="customPreviewButtons" :designer="designer" :global-dsv="globalDsv" :i18n="i18n" :changeI18n="changeI18n"></slot>
+            </template>
             <template v-for="slotName in Object.keys($slots).filter(s => s.endsWith('-widget'))" #[slotName]="scope">
               <slot :name="slotName" v-bind="scope"></slot>
             </template>
@@ -29,7 +32,7 @@
         </el-header>
         <el-main class="form-widget-main">
           <el-scrollbar class="container-scroll-bar" :style="{height: scrollerHeight}">
-            <v-form-widget :custom-events="customEvents" :designer="designer" :form-config="designer.formConfig" :global-dsv="globalDsv" ref="formRef">
+            <v-form-widget :i18n="i18n" :custom-events="customEvents" :designer="designer" :form-config="designer.formConfig" :global-dsv="globalDsv" ref="formRef">
               <template v-for="slotName in Object.keys($slots).filter(s => s.endsWith('-widget'))" #[slotName]="scope">
                 <slot :name="slotName" v-bind="scope"></slot>
               </template>
@@ -76,6 +79,10 @@
       VFormWidget,
     },
     props: {
+      i18n: {
+        type: String,
+        default: 'zh-cn',
+      },
       /* 后端字段列表API */
       fieldListApi: {
         type: Object,

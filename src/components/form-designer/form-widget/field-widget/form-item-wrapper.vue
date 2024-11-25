@@ -94,7 +94,10 @@
         type: String,
         default: ''
       },
-
+      i18n: {
+        type: String,
+        default: 'zh-cn',
+      },
       rules: Array,
     },
     inject: ['getFormConfig', 'getSubFormFieldFlag', 'getSubFormName'],
@@ -110,6 +113,9 @@
       label() {
         if (!!this.field.options.labelHidden) {
           return ''
+        }
+        if (this.i18n !== 'zh-cn') {
+          return this.field.options.labelI18n?.[this.i18n] || this.field.options.label
         }
 
         return this.field.options.label

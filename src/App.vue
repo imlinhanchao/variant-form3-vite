@@ -6,6 +6,7 @@
 
 <script>
 import Designer from './sample/index.vue'
+import i18n from './utils/i18n';
 
 export default {
   name: 'App',
@@ -16,7 +17,7 @@ export default {
     return {
       //全局数据源变量
       globalDsv: {
-      },
+      }
     }
   },
   computed: {

@@ -16,11 +16,11 @@
             <div class="transition-group-el">
               <template v-if="'container' === widget.category">
                 <component :is="getWidgetName(widget)" :widget="widget" :designer="designer" :key="widget.id" :parent-list="designer.widgetList"
-                                  :index-of-parent-list="index" :parent-widget="null"></component>
+                                  :index-of-parent-list="index" :parent-widget="null" :i18n="i18n"></component>
               </template>
               <template v-else-if="widgets[getWidgetName(widget)]">
                 <component :is="getWidgetName(widget)" :field="widget" :designer="designer" :key="widget.id" :parent-list="designer.widgetList"
-                              :index-of-parent-list="index" :parent-widget="null" :design-state="true"></component>
+                              :index-of-parent-list="index" :parent-widget="null" :design-state="true" :i18n="i18n"></component>
               </template>
               <template v-else>
                 <component 
@@ -33,6 +33,7 @@
                   :parent-widget="null" 
                   :design-state="true"
                   :custom-events="customEvents"
+                  :i18n="i18n"
                 >
                   <template #default="scoped">
                     <span class="custom-widge">
@@ -64,6 +65,10 @@
       ...FieldComponents,
     },
     props: {
+      i18n: {
+        type: String,
+        default: 'zh-cn',
+      },
       designer: Object,
       formConfig: Object,
       optionData: { //prop传入的选项数据

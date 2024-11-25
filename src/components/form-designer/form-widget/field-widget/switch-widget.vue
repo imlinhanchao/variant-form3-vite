@@ -1,10 +1,10 @@
 <template>
-  <form-item-wrapper :designer="designer" :field="field" :rules="rules" :design-state="designState"
+  <form-item-wrapper :designer="designer" :field="field" :rules="rules" :design-state="designState" :i18n="i18n"
                      :parent-widget="parentWidget" :parent-list="parentList" :index-of-parent-list="indexOfParentList"
                      :sub-form-row-index="subFormRowIndex" :sub-form-col-index="subFormColIndex" :sub-form-row-id="subFormRowId">
     <el-switch ref="fieldEditor" v-model="fieldModel" :class="[isReadMode ? 'readonly-mode-switch' : '']"
                :disabled="field.options.disabled"
-               :active-text="field.options.activeText" :inactive-text="field.options.inactiveText"
+               :active-text="activeText" :inactive-text="inactiveText"
                :active-color="field.options.activeColor" :inactive-color="field.options.inactiveColor"
                :width="field.options.switchWidth"
                @change="handleChangeEvent">
@@ -49,6 +49,10 @@
         type: String,
         default: ''
       },
+      i18n: {
+        type: String,
+        default: 'zh-cn',
+      },
 
     },
     components: {
@@ -62,7 +66,20 @@
       }
     },
     computed: {
-
+      activeText() {
+        if (this.i18n != 'zh-cn') {
+          return this.field.options.activeI18n?.[this.i18n] || this.field.options.activeText
+        } else {
+          return this.field.options.activeText
+        }
+      },
+      inactiveText() {
+        if (this.i18n != 'zh-cn') {
+          return this.field.options.inactiveI18n?.[this.i18n] || this.field.options.inactiveText
+        } else {
+          return this.field.options.inactiveText
+        }
+      },
     },
     beforeCreate() {
       /* 这里不能访问方法和属性！！ */

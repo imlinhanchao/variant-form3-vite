@@ -1,17 +1,17 @@
 <template>
-  <form-item-wrapper :designer="designer" :field="field" :rules="rules" :design-state="designState"
+  <form-item-wrapper :designer="designer" :field="field" :rules="rules" :design-state="designState" :i18n="i18n"
                      :parent-widget="parentWidget" :parent-list="parentList" :index-of-parent-list="indexOfParentList"
                      :sub-form-row-index="subFormRowIndex" :sub-form-col-index="subFormColIndex" :sub-form-row-id="subFormRowId">
     <el-radio-group ref="fieldEditor" v-model="fieldModel"
                     :disabled="field.options.disabled || isReadMode" :size="widgetSize"
                     @change="handleChangeEvent">
       <template v-if="!!field.options.buttonStyle">
-        <el-radio-button v-for="(item, index) in field.options.optionItems" :key="index" :label="item.value"
+        <el-radio-button v-for="(item, index) in options" :key="index" :label="item.value"
                          :disabled="item.disabled" :border="field.options.border"
                          :style="{display: field.options.displayStyle}">{{item.label}}</el-radio-button>
       </template>
       <template v-else>
-        <el-radio v-for="(item, index) in field.options.optionItems" :key="index" :label="item.value"
+        <el-radio v-for="(item, index) in options" :key="index" :label="item.value"
                   :disabled="item.disabled" :border="field.options.border"
                   :style="{display: field.options.displayStyle}">{{item.label}}</el-radio>
       </template>
@@ -53,6 +53,10 @@
         type: String,
         default: ''
       },
+      i18n: {
+        type: String,
+        default: 'zh-cn',
+      },
 
     },
     components: {
@@ -66,7 +70,18 @@
       }
     },
     computed: {
-
+      options() {
+        if (this.i18n != 'zh-cn') {
+          return this.field.options.optionItems.map(item => {
+            return {
+              label: item.labelI18n?.[this.i18n] || item.label,
+              value: item.value,
+              disabled: item.disabled
+            }
+          })
+        }
+        return this.field.options.optionItems
+      }
     },
     beforeCreate() {
       /* 这里不能访问方法和属性！！ */
