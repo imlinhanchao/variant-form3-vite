@@ -168,6 +168,7 @@
       },
 
       showFormTemplates() {
+        return false;
         if (this.designerConfig['formTemplates'] === undefined) {
           return true
         }

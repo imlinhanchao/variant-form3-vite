@@ -115,7 +115,7 @@
             <component :is="(component as any).default" v-bind="scoped" />
           </template>
           <template #customToolButtons>
-            <el-select v-model="i18n" style="width: 80px">
+            <el-select v-model="i18n" style="width: 100px">
               <el-option label="中文" value="zh-cn"></el-option>
               <el-option label="English" value="en"></el-option>
             </el-select>

@@ -13,7 +13,7 @@
         <el-button :type="layoutType === 'H5' ? 'info': ''" @click="changeLayoutType('H5')">
           {{i18nt('designer.toolbar.mobileLayout')}}</el-button>
       </el-button-group>
-      <el-button style="margin-left: 20px" :title="i18nt('designer.toolbar.nodeTreeHint')" @click="showNodeTreeDrawer">
+      <el-button style="margin-left: 10px" :title="i18nt('designer.toolbar.nodeTreeHint')" @click="showNodeTreeDrawer">
         <svg-icon icon-class="node-tree" /></el-button>
     </div>
 
@@ -23,21 +23,41 @@
                icon-class="el-icon-arrow-right" @node-click="onNodeTreeClick"></el-tree>
     </el-drawer>
 
-    <div class="right-toolbar" :style="{width: toolbarWidth + 'px'}">
+    <div class="right-toolbar">
       <div class="right-toolbar-con">
-        <el-button v-if="showToolButton('clearDesignerButton')" link type="primary" @click="clearFormWidget">
-          <svg-icon icon-class="el-delete" />{{i18nt('designer.toolbar.clear')}}</el-button>
-        <el-button v-if="showToolButton('previewFormButton')" link type="primary" @click="previewForm">
-          <svg-icon icon-class="el-view" />{{i18nt('designer.toolbar.preview')}}</el-button>
-        <el-button v-if="showToolButton('importJsonButton')" link type="primary" @click="importJson">
-          {{i18nt('designer.toolbar.importJson')}}</el-button>
-        <el-button v-if="showToolButton('exportJsonButton')" link type="primary" @click="exportJson">
-          {{i18nt('designer.toolbar.exportJson')}}</el-button>
-        <el-button v-if="showToolButton('exportCodeButton')" link type="primary" @click="exportCode">
-          {{i18nt('designer.toolbar.exportCode')}}</el-button>
-        <el-button v-if="showToolButton('generateSFCButton')" link type="primary" @click="generateSFC">
-          <svg-icon icon-class="vue-sfc" />{{i18nt('designer.toolbar.generateSFC')}}</el-button>
-        <slot name="customToolButtons"></slot>
+        <el-tooltip :content="i18nt('designer.toolbar.clear')" v-if="showToolButton('clearDesignerButton')">
+          <el-button link type="primary" @click="clearFormWidget">
+            <svg-icon icon-class="el-delete" />
+          </el-button>
+        </el-tooltip>
+        <el-tooltip :content="i18nt('designer.toolbar.preview')" v-if="showToolButton('previewFormButton')">
+          <el-button link type="primary" @click="previewForm">
+            <svg-icon icon-class="el-view" />
+          </el-button>
+        </el-tooltip>
+        <el-tooltip :content="i18nt('designer.toolbar.importJson')" v-if="showToolButton('importJsonButton')">
+          <el-button link type="primary" @click="importJson">
+            <svg-icon icon-class="el-move-up" />
+          </el-button>
+        </el-tooltip>
+        <el-tooltip :content="i18nt('designer.toolbar.exportJson')" v-if="showToolButton('exportJsonButton')">
+          <el-button link type="primary" @click="exportJson">
+            <svg-icon icon-class="el-move-down" />
+          </el-button>
+        </el-tooltip>
+        <el-tooltip :content="i18nt('designer.toolbar.exportCode')" v-if="showToolButton('exportCodeButton')">
+          <el-button link type="primary" @click="exportCode">
+            <svg-icon icon-class="byd-download" />
+          </el-button>
+        </el-tooltip>
+        <el-tooltip :content="i18nt('designer.toolbar.generateSFC')" v-if="showToolButton('generateSFCButton')">
+          <el-button link type="primary" @click="generateSFC">
+            <svg-icon icon-class="vue-sfc" />
+          </el-button>
+        </el-tooltip>
+        <span style="margin-left: 10px">
+          <slot name="customToolButtons"></slot>
+        </span>
       </div>
     </div>
 
@@ -746,10 +766,9 @@
 </script>
 
 <style lang="scss" scoped>
-  .toolbar-container:after {
-    display: block;
-    content: "";
-    clear: both;
+  .toolbar-container {
+    display: flex;
+    justify-content: space-between;
   }
 
   .left-toolbar {
@@ -757,17 +776,19 @@
     margin-top: 4px;
     float: left;
     font-size: 16px;
+    width: 100%;
   }
 
   .right-toolbar {
+    width: 100%;
     display: flex;
-    float: right;
     line-height: 42px;
     text-align: right;
     overflow: hidden;
+    justify-content: flex-end;
 
     .right-toolbar-con {
-      text-align: left;
+      text-align: right;
       width: 600px;
     }
 
