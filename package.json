@@ -4,7 +4,7 @@
   "private": false,
   "scripts": {
     "dev": "vite --host",
-    "prepublish": "npm run lib && npm run lib-render && node build/build.js",
+    "prepare": "npm run lib && npm run lib-render && node build/build.js",
     "build": "vite build",
     "lib": "vite build --config build/vite-lib.config.js",
     "lib-render": "vite build --config build/vite-lib-render.config.js",
